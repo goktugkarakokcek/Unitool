@@ -1,18 +1,22 @@
 const MODELS_TO_TRY = [
     'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash'
+    'gemini-2.5-flash-lite',
+    'gemini-2.0-flash'
 ];
 
 function extractArrayFromText(rawText) {
     if (!rawText) return null;
-    const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-    const parsed = JSON.parse(cleaned);
-    if (Array.isArray(parsed)) return parsed;
-    if (parsed && typeof parsed === 'object') {
-        for (const k of Object.keys(parsed)) {
-            if (Array.isArray(parsed[k])) return parsed[k];
+    try {
+        const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+        const parsed = JSON.parse(cleaned);
+        if (Array.isArray(parsed)) return parsed;
+        if (parsed && typeof parsed === 'object') {
+            for (const k of Object.keys(parsed)) {
+                if (Array.isArray(parsed[k])) return parsed[k];
+            }
         }
+    } catch (_) {
+        return null;
     }
     return null;
 }
@@ -38,7 +42,11 @@ exports.handler = async (event) => {
             return { statusCode: 400, body: JSON.stringify({ error: 'Görsel verisi boş.' }) };
         }
 
-        const shuffledKeys = [...keyPool].sort(() => Math.random() - 0.5);
+        // Eğer base64 başında "data:image/jpeg;base64," varsa temizle
+        const cleanBase64 = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+
+        // Timeout'a takılmamak için en fazla 2 farklı anahtar dene
+        const shuffledKeys = [...keyPool].sort(() => Math.random() - 0.5).slice(0, 2);
 
         const promptText = `Sen Türkiye'deki üniversitelerin (OBS, ÜBYS, Proliz vb.) haftalık ders programı tablolarını okuyan uzman bir asistansın.
 Görseldeki haftalık ders programını incele ve sadece gerçek dersleri JSON dizisi olarak çıkar.
@@ -53,7 +61,7 @@ KESİN KURALLAR:
             contents: [{
                 parts: [
                     { text: promptText },
-                    { inline_data: { mime_type: mimeType || 'image/jpeg', data: imageBase64 } }
+                    { inline_data: { mime_type: mimeType || 'image/jpeg', data: cleanBase64 } }
                 ]
             }],
             generationConfig: {
@@ -81,12 +89,14 @@ KESİN KURALLAR:
         for (const apiKey of shuffledKeys) {
             for (const modelName of MODELS_TO_TRY) {
                 try {
-                    // URL'yi metin olarak birleştiriyoruz ki otomatik linke dönüşüp bozulmasın
-                    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + apiKey;
+                    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
                     
                     const response = await fetch(endpoint, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-goog-api-key': apiKey
+                        },
                         body: JSON.stringify(requestBody)
                     });
 
@@ -100,7 +110,7 @@ KESİN KURALLAR:
                     const rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
                     const parsed = extractArrayFromText(rawText);
 
-                    if (parsed && parsed.length > 0) {
+                    if (Array.isArray(parsed)) {
                         return {
                             statusCode: 200,
                             headers: { 'Content-Type': 'application/json' },
