@@ -84,13 +84,13 @@ KESİN KURALLAR:
             for (const modelName of MODELS_TO_TRY) {
                 try {
                     const response = await fetch(
-                        `[https://generativelanguage.googleapis.com/v1beta/models/$](https://generativelanguage.googleapis.com/v1beta/models/$){modelName}:generateContent?key=${apiKey}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(requestBody)
-                        }
-                    );
+                    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody)
+                    }
+                );
 
                     if (!response.ok) {
                         const errData = await response.json().catch(() => ({}));
