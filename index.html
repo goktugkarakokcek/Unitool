@@ -10,7 +10,7 @@
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" type="image/svg+xml" href="./icon.svg">
     <link rel="apple-touch-icon" href="./icon.svg">
-    <title>UniTool v4.2 - Akademik Kontrol</title>
+    <title>UniTool v4.3 - Akademik Kontrol</title>
     <style>
         /* SIFIRLAMA VE TEMEL DEĞİŞKENLER */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border: 0 solid #1e293b; }
@@ -281,7 +281,7 @@
         input:focus, select:focus { outline: none; border-color: #6366f1 !important; }
         button { cursor: pointer; background: transparent; }
 
-        #netlify-badge, a[href*="netlify.com/experimental"] { display: none !important; opacity: 0 !important; pointer-events: none !important; }
+        #netlify-badge, a[href*="[netlify.com/experimental](https://netlify.com/experimental)"] { display: none !important; opacity: 0 !important; pointer-events: none !important; }
     </style>
 </head>
 <body>
@@ -299,7 +299,7 @@
                     <span class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg text-sm font-black">UT</span>
                     <div>
                         <span class="font-bold text-white text-base block leading-none">UniTool</span>
-                        <span class="text-[11px] text-slate-400 mt-1 block">v4.2 Hibrit Motor</span>
+                        <span class="text-[11px] text-slate-400 mt-1 block">v4.3 Saf Gemini AI</span>
                     </div>
                 </div>
                 <button type="button" onclick="toggleDrawer(false)" class="text-slate-400 p-1 text-2xl leading-none">&times;</button>
@@ -365,7 +365,7 @@
         </div>
 
         <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
-            UniTool v4.2 &bull; 3 Katmanlı Hibrit Sistem
+            UniTool v4.3 &bull; Gemini Vision
         </div>
     </aside>
 
@@ -439,7 +439,7 @@
         </section>
 
         <!-- ========================================== -->
-        <!-- MODÜL 2: HAFTALIK PROGRAM & HİBRİT TARAMA  -->
+        <!-- MODÜL 2: HAFTALIK PROGRAM & GEMINI VISION  -->
         <!-- ========================================== -->
         <section id="view-schedule" class="hidden space-y-5">
 
@@ -447,13 +447,13 @@
                 <div>
                     <h2 class="text-sm font-bold text-white">📸 Fotoğraftan Otomatik Program</h2>
                     <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
-                        Ders programı ekran görüntüsünü seç; hibrit motor (Gizli Bulut AI + Çoklu Anahtar + Yerel OCR) tabloyu otomatik çıkarsın.
+                        Ders programı ekran görüntüsünü yükle; yapay zeka ders kodlarını ve derslikleri temizleyip haftalık programı çıkarsın.
                     </p>
                 </div>
 
                 <div class="flex gap-2">
                     <label class="flex-1 bg-indigo-600 text-white text-xs font-bold py-3 px-3 rounded-xl text-center shadow active:scale-98 transition" style="background:#4f46e5; cursor:pointer;">
-                        🖼️ Program Fotoğrafı Seç ve Otomatik Tara
+                        🖼️ Program Fotoğrafı Seç ve Çözümle
                         <input type="file" id="schedulePhotoInput" accept="image/*" class="hidden" onchange="handleSchedulePhotoUpload(event)">
                     </label>
                 </div>
@@ -843,13 +843,17 @@
 
     <script>
         // ============================================================================
-        // KATMAN 2 YEDEK ANAHTAR HAVUZU (İSTEĞE BAĞLI - SÜRÜKLE BIRAK KULLANIMI İÇİN)
-        // Netlify Environment Variables kullanıyorsan burayı boş bırakabilirsin.
-        // Eğer GitHub/CLI bağlamadan doğrudan klasör sürükle-bırak yapıyorsan,
-        // buraya 1, 2 veya 3 adet ücretsiz Gemini API anahtarı yazabilirsin:
-        // Örn: const CLIENT_KEY_POOL = ["AIzaSyBirinci...", "AIzaSyIkinci..."];
+        // ANAHTAR HAVUZU (BURAYA EN AZ 1 ADET GEMINI API ANAHTARI YAZABİLİRSİN)
+        // Netlify Environment Variables henüz aktif değilse doğrudan buradaki anahtarları kullanır:
+        // Örn: const CLIENT_KEY_POOL = ["AIzaSy..."];
         // ============================================================================
         const CLIENT_KEY_POOL = [];
+
+        const GEMINI_MODELS = [
+            'gemini-2.5-flash',
+            'gemini-2.0-flash',
+            'gemini-1.5-flash'
+        ];
 
         // --- VERİ YAPILARI ---
         let activeTab = 'attendance';
@@ -980,7 +984,7 @@
         // --- JSON YEDEKLEME VE GERİ YÜKLEME ---
         function exportAllDataJSON() {
             const payload = {
-                version: '4.2',
+                version: '4.3',
                 exportedAt: new Date().toISOString(),
                 courses,
                 scheduleItems,
@@ -1201,13 +1205,9 @@
         }
 
         // ============================================================================
-        // 3 KATMANLI HİBRİT FOTOĞRAF ÇÖZÜMLEME MİMARİSİ
-        // 1. Katman: Netlify Gizli Sunucu Fonksiyonu (/.netlify/functions/parse-schedule)
-        // 2. Katman: İstemci Çoklu Anahtar Havuzu (CLIENT_KEY_POOL - Key Rotation)
-        // 3. Katman: Yerel Koordinatlı Tablo OCR (Tesseract.js - Sıfır API Yedeği)
+        // SAF GEMINI VISION TABLO ÇÖZÜMLEYİCİ (OCR KALDIRILDI - KATI JSON ŞEMALI)
         // ============================================================================
 
-        // 10 MB'lık fotoğrafları ~250KB JPEG'e sıkıştırır (Sunucu 6MB sınırını aşmamak ve hızı 5x artırmak için)
         function compressImageForAI(file) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
@@ -1225,7 +1225,7 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
                     URL.revokeObjectURL(url);
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
                     resolve({
                         base64: dataUrl.split(',')[1],
                         mimeType: 'image/jpeg'
@@ -1236,19 +1236,51 @@
             });
         }
 
-        function normalizeParsedSchedule(rawArray) {
-            if (!Array.isArray(rawArray)) return [];
-            return rawArray.map(item => ({
-                id: Date.now() + Math.random(),
-                name: String(item.name || 'Ders').trim(),
-                day: Number(item.day >= 0 && item.day <= 6 ? item.day : 1),
-                startTime: String(item.startTime || '09:00'),
-                endTime: String(item.endTime || '11:00'),
-                hours: Math.max(1, parseInt(item.hours) || 2)
-            }));
+        function extractArrayFromText(rawText) {
+            if (!rawText) return null;
+            const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+            const parsed = JSON.parse(cleaned);
+            if (Array.isArray(parsed)) return parsed;
+            if (parsed && typeof parsed === 'object') {
+                for (const k of Object.keys(parsed)) {
+                    if (Array.isArray(parsed[k])) return parsed[k];
+                }
+            }
+            return null;
         }
 
-        // KATMAN 1: Netlify Gizli Sunucu Fonksiyonu Çağrısı
+        // Aynı gün içinde alt alta gelen aynı dersleri birleştirir ve kodları temizler
+        function normalizeAndMergeSchedule(rawArray) {
+            if (!Array.isArray(rawArray)) return [];
+            const cleanedList = rawArray.map(item => {
+                let cleanName = String(item.name || 'Ders')
+                    .replace(/^[A-ZÇĞİÖŞÜ]{2,5}\s*[-.]?\s*\d{3,4}[A-Z]?\s*[-:]?\s*/i, '')
+                    .trim();
+                return {
+                    id: Date.now() + Math.random(),
+                    name: cleanName || 'Ders',
+                    day: Number(item.day >= 0 && item.day <= 6 ? item.day : 1),
+                    startTime: String(item.startTime || '09:00'),
+                    endTime: String(item.endTime || '11:00'),
+                    hours: Math.max(1, parseInt(item.hours) || 1)
+                };
+            });
+
+            // Aynı gün aynı isimle birden fazla satır döndürüldüyse tek blokta birleştir
+            const merged = [];
+            cleanedList.forEach(curr => {
+                const existing = merged.find(m => m.day === curr.day && m.name.toLowerCase() === curr.name.toLowerCase());
+                if (existing) {
+                    existing.hours = Math.min(8, existing.hours + curr.hours);
+                    if (curr.startTime < existing.startTime) existing.startTime = curr.startTime;
+                    if (curr.endTime > existing.endTime) existing.endTime = curr.endTime;
+                } else {
+                    merged.push(curr);
+                }
+            });
+            return merged;
+        }
+
         async function tryServerlessFunction(compressed) {
             try {
                 const res = await fetch('/.netlify/functions/parse-schedule', {
@@ -1259,95 +1291,93 @@
                         mimeType: compressed.mimeType
                     })
                 });
-                if (!res.ok) return null;
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    return { error: data.message || data.error || `Sunucu Fonksiyonu HTTP ${res.status}` };
+                }
                 if (data && Array.isArray(data.items) && data.items.length > 0) {
-                    return normalizeParsedSchedule(data.items);
+                    return { items: normalizeAndMergeSchedule(data.items) };
                 }
-                return null;
+                return { error: 'Sunucu boş yanıt döndürdü.' };
             } catch (e) {
-                return null;
+                return { error: e.message };
             }
         }
 
-        // KATMAN 2: İstemci Çoklu Anahtar Havuzu (Key Rotation & Failover)
         async function tryClientKeyPool(compressed) {
-            if (!Array.isArray(CLIENT_KEY_POOL) || CLIENT_KEY_POOL.length === 0) return null;
-            const shuffled = [...CLIENT_KEY_POOL].map(k => k.trim()).filter(Boolean).sort(() => Math.random() - 0.5);
-            if (shuffled.length === 0) return null;
+            const savedLocalKey = localStorage.getItem('unitool_gemini_key') || '';
+            const pool = [...CLIENT_KEY_POOL, savedLocalKey].map(k => k.trim()).filter(Boolean);
 
-            const promptText = `Bu üniversite ders programı görselindeki tüm dersleri JSON dizisi olarak çıkar: [{"name":"Ders Adı","day":1,"startTime":"09:00","endTime":"11:00","hours":2}]. Pazartesi=1..Cuma=5.`;
+            if (pool.length === 0) {
+                return { error: 'NO_CLIENT_KEY' };
+            }
 
-            for (let i = 0; i < shuffled.length; i++) {
-                try {
-                    const response = await fetch(
-                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${shuffled[i]}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{
-                                    parts: [
-                                        { text: promptText },
-                                        { inline_data: { mime_type: compressed.mimeType, data: compressed.base64 } }
-                                    ]
-                                }],
-                                generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
-                            })
+            const shuffled = [...pool].sort(() => Math.random() - 0.5);
+
+            const promptText = `Sen Türkiye'deki üniversitelerin (OBS, ÜBYS, Proliz vb.) haftalık ders programı tablolarını okuyan uzman bir asistansın.
+Görseldeki haftalık ders programını incele ve sadece gerçek dersleri JSON dizisi olarak çıkar.
+
+KESİN KURALLAR:
+1. "name" alanına SADECE dersin temiz Türkçe adını yaz. Ders kodlarını (örn: BIL101, YZO203), şube numaralarını, derslik/amfi/lab kodlarını (örn: D-201, Lab-2) ve öğretim elemanı isimlerini/unvanlarını (Prof., Doç., Dr., Öğr. Gör.) KESİNLİKLE YAZMA.
+2. Tabloda aynı gün içinde aynı ders alt alta birden fazla saat satırında (örneğin 09:00, 10:00, 11:00 dilimlerinde) tekrar ediyorsa bunları ayrı ayrı döndürme! Tek bir ders olarak birleştir, kaç saat/satır sürüyorsa "hours" alanına toplam saati yaz (örn: 3), ilk başlangıç saatini "startTime", son bitiş saatini "endTime" yap.
+3. Gün numaraları: Pazartesi=1, Salı=2, Çarşamba=3, Perşembe=4, Cuma=5, Cumartesi=6, Pazar=0.`;
+
+            const requestBody = {
+                contents: [{
+                    parts: [
+                        { text: promptText },
+                        { inline_data: { mime_type: compressed.mimeType, data: compressed.base64 } }
+                    ]
+                }],
+                generationConfig: {
+                    temperature: 0.1,
+                    response_mime_type: "application/json",
+                    response_schema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                name: { type: "STRING" },
+                                day: { type: "INTEGER" },
+                                startTime: { type: "STRING" },
+                                endTime: { type: "STRING" },
+                                hours: { type: "INTEGER" }
+                            },
+                            required: ["name", "day", "startTime", "endTime", "hours"]
                         }
-                    );
-                    if (!response.ok) continue; // 429 vs. gelirse sıradaki anahtara geç
-                    const result = await response.json();
-                    const parsed = JSON.parse(result?.candidates?.[0]?.content?.parts?.[0]?.text || '[]');
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        return normalizeParsedSchedule(parsed);
                     }
-                } catch (e) {
-                    continue;
+                }
+            };
+
+            let lastErr = '';
+            for (const apiKey of shuffled) {
+                for (const modelName of GEMINI_MODELS) {
+                    try {
+                        const response = await fetch(
+                            `[https://generativelanguage.googleapis.com/v1beta/models/$](https://generativelanguage.googleapis.com/v1beta/models/$){modelName}:generateContent?key=${apiKey}`,
+                            {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(requestBody)
+                            }
+                        );
+                        if (!response.ok) {
+                            const errJson = await response.json().catch(() => ({}));
+                            lastErr = errJson?.error?.message || `HTTP ${response.status} (${modelName})`;
+                            continue;
+                        }
+                        const result = await response.json();
+                        const rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        const parsed = extractArrayFromText(rawText);
+                        if (parsed && parsed.length > 0) {
+                            return { items: normalizeAndMergeSchedule(parsed) };
+                        }
+                    } catch (e) {
+                        lastErr = e.message;
+                    }
                 }
             }
-            return null;
-        }
-
-        // KATMAN 3: Yerel Koordinatlı Tablo OCR Motoru (Tesseract.js)
-        let tesseractLoaded = false;
-        function loadTesseractScript() {
-            if (tesseractLoaded || window.Tesseract) return Promise.resolve();
-            return new Promise((resolve, reject) => {
-                const s = document.createElement('script');
-                s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-                s.onload = () => { tesseractLoaded = true; resolve(); };
-                s.onerror = () => reject(new Error('OCR kütüphanesi yüklenemedi. İnternet bağlantını kontrol et.'));
-                document.head.appendChild(s);
-            });
-        }
-
-        function preprocessImageForOCR(file) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                const url = URL.createObjectURL(file);
-                img.onload = () => {
-                    const scale = img.width < 1200 ? 1.8 : 1.2;
-                    const canvas = document.createElement('canvas');
-                    canvas.width = Math.min(2400, Math.round(img.width * scale));
-                    canvas.height = Math.round(img.height * (canvas.width / img.width));
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const d = imgData.data;
-                    for (let i = 0; i < d.length; i += 4) {
-                        const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-                        const contrasted = gray < 155 ? Math.max(0, gray * 0.6) : 255;
-                        d[i] = d[i + 1] = d[i + 2] = contrasted;
-                    }
-                    ctx.putImageData(imgData, 0, 0);
-                    URL.revokeObjectURL(url);
-                    resolve(canvas.toDataURL('image/png'));
-                };
-                img.onerror = reject;
-                img.src = url;
-            });
+            return { error: lastErr || 'API anahtarı yanıt vermedi.' };
         }
 
         async function handleSchedulePhotoUpload(e) {
@@ -1360,39 +1390,50 @@
             previewContainer.classList.add('hidden');
 
             try {
-                statusBox.innerHTML = `⏳ Görsel optimize ediliyor ve akıllı tarayıcıya gönderiliyor...`;
+                statusBox.innerHTML = `⏳ Ders programı fotoğrafı Gemini Vision AI ile analiz ediliyor (3-5 sn)...`;
                 const compressed = await compressImageForAI(file);
 
-                // ADIM 1: Gizli Netlify Sunucu Fonksiyonunu Dene
-                let extracted = await tryServerlessFunction(compressed);
-
-                // ADIM 2: Sunucu fonksiyonu yoksa İstemci Anahtar Havuzunu (Key Rotation) Dene
-                if (!extracted) {
-                    extracted = await tryClientKeyPool(compressed);
-                }
-
-                // ADIM 3: Anahtarlar tanımsızsa veya kotalar doluysa Yerel Tablo OCR Motoruna Düş
-                if (!extracted) {
-                    statusBox.innerHTML = `🔍 Yerel Türkçe Tablo Okuyucu (OCR) devreye alındı, sütunlar taranıyor...`;
-                    const processedDataUrl = await preprocessImageForOCR(file);
-                    await loadTesseractScript();
-                    const worker = await Tesseract.createWorker('tur');
-                    const ret = await worker.recognize(processedDataUrl);
-                    await worker.terminate();
-                    extracted = parseScheduleFromOCRData(ret.data);
-                }
-
-                if (!extracted || extracted.length === 0) {
-                    pendingAiItems = [
-                        { id: Date.now() + 1, name: 'Örnek Ders 1', day: 1, startTime: '09:00', endTime: '11:00', hours: 2 }
-                    ];
-                    statusBox.innerHTML = `<span class="text-amber-400 font-bold">⚠️ Uyarı:</span> Görsel çok düşük çözünürlüklü olduğu için net ayrıştırılamadı. Aşağıdan satır ekleyerek hızlıca tamamlayabilirsin.`;
-                } else {
-                    pendingAiItems = extracted;
+                // 1. Önce Netlify Gizli Sunucu Fonksiyonunu Dene
+                const serverRes = await tryServerlessFunction(compressed);
+                if (serverRes && serverRes.items) {
+                    pendingAiItems = serverRes.items;
                     statusBox.classList.add('hidden');
+                    renderAiPreviewList();
+                    e.target.value = '';
+                    return;
                 }
 
-                renderAiPreviewList();
+                // 2. Sunucu çalışmadıysa İstemci Anahtar Havuzunu (CLIENT_KEY_POOL) Dene
+                const clientRes = await tryClientKeyPool(compressed);
+                if (clientRes && clientRes.items) {
+                    pendingAiItems = clientRes.items;
+                    statusBox.classList.add('hidden');
+                    renderAiPreviewList();
+                    e.target.value = '';
+                    return;
+                }
+
+                // 3. İkisi de başarısızsa gerçek teknik sebebi açıkça göster ve hızlı anahtar tanımlama kutusu aç
+                statusBox.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="text-rose-400 font-bold">⚠️ Gemini API Bağlantısı Kurulamadı:</p>
+                        <p class="text-[11px] text-slate-300">
+                            • Sunucu Durumu: <code class="text-amber-300">${serverRes?.error || 'Yanıt yok'}</code><br>
+                            • İstemci Havuzu: <code class="text-amber-300">${clientRes?.error === 'NO_CLIENT_KEY' ? 'CLIENT_KEY_POOL dizisi boş' : clientRes?.error}</code>
+                        </p>
+                        <div class="pt-2 border-t border-slate-800 space-y-1.5">
+                            <label class="block text-[11px] text-indigo-300 font-semibold">Hızlı Çözüm: API Anahtarını Buraya Yapıştırıp Kaydet:</label>
+                            <div class="flex gap-1.5">
+                                <input type="password" id="quickFixApiKey" placeholder="AIzaSy..." 
+                                    class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                                <button type="button" onclick="saveQuickFixKey()" 
+                                    class="bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg" style="background:#4f46e5;">
+                                    Kaydet
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
 
             } catch (err) {
                 statusBox.innerHTML = `<span class="text-rose-400 font-bold">Hata:</span> ${err.message}`;
@@ -1401,143 +1442,11 @@
             }
         }
 
-        function parseScheduleFromOCRData(ocrData) {
-            const words = ocrData.words || [];
-            const lines = ocrData.lines || [];
-
-            const dayMatchers = [
-                { day: 1, regex: /(pazartes|pzt|monday|\bmon\b)/i },
-                { day: 2, regex: /(\bsal[ıi]\b|\bsal\b|tuesday|\btue\b)/i },
-                { day: 3, regex: /(çarşamba|carsamba|\bçar\b|\bcar\b|wednesday)/i },
-                { day: 4, regex: /(perşembe|persembe|\bper\b|thursday)/i },
-                { day: 5, regex: /(\bcuma\b|\bcum\b|friday)/i },
-                { day: 6, regex: /(cumartes|\bcmt\b|saturday)/i }
-            ];
-
-            let dayAnchors = [];
-            words.forEach(w => {
-                const txt = (w.text || '').trim();
-                if (txt.length < 3) return;
-                dayMatchers.forEach(dm => {
-                    if (dm.regex.test(txt) && !dayAnchors.some(a => a.day === dm.day)) {
-                        dayAnchors.push({
-                            day: dm.day,
-                            xCenter: (w.bbox.x0 + w.bbox.x1) / 2,
-                            yCenter: (w.bbox.y0 + w.bbox.y1) / 2,
-                            x0: w.bbox.x0, x1: w.bbox.x1, y0: w.bbox.y0, y1: w.bbox.y1
-                        });
-                    }
-                });
-            });
-
-            let isColumnLayout = false;
-            if (dayAnchors.length >= 2) {
-                const xSpread = Math.max(...dayAnchors.map(a => a.xCenter)) - Math.min(...dayAnchors.map(a => a.xCenter));
-                const ySpread = Math.max(...dayAnchors.map(a => a.yCenter)) - Math.min(...dayAnchors.map(a => a.yCenter));
-                isColumnLayout = xSpread > ySpread;
-            }
-
-            const noiseRegex = /^(pazartes|sal[ıi]|çarşamba|carsamba|perşembe|persembe|cuma|cumartes|pazar|saat|ders|kod|şube|sube|derslik|amfi|lab|online|uzaktan|prof|doç|doc|dr|öğr|ogr|gör|gor|arş|ars|üyesi|uyesi|bölüm|bolum|fakülte|zorunlu|seçmeli)$/i;
-            const timeRegex = /(\d{1,2}[:.]\d{2})\s*[-–]?\s*(\d{1,2}[:.]\d{2})?/;
-
-            let rawCandidates = [];
-
-            if (isColumnLayout && dayAnchors.length >= 2) {
-                dayAnchors.sort((a, b) => a.xCenter - b.xCenter);
-                const headerY = Math.max(...dayAnchors.map(a => a.y1));
-
-                const colBounds = dayAnchors.map((a, idx) => {
-                    const left = idx === 0 ? Math.max(0, a.x0 - 80) : (dayAnchors[idx - 1].xCenter + a.xCenter) / 2;
-                    const right = idx === dayAnchors.length - 1 ? a.x1 + 250 : (a.xCenter + dayAnchors[idx + 1].xCenter) / 2;
-                    return { day: a.day, left, right };
-                });
-
-                colBounds.forEach(col => {
-                    const colWords = words.filter(w => {
-                        const xc = (w.bbox.x0 + w.bbox.x1) / 2;
-                        return w.bbox.y0 > headerY + 5 && xc >= col.left && xc < col.right;
-                    }).sort((a, b) => a.bbox.y0 - b.bbox.y0);
-
-                    let clusters = [];
-                    colWords.forEach(w => {
-                        const clean = (w.text || '').replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ\s:.-]/g, '').trim();
-                        if (clean.length < 2 || noiseRegex.test(clean)) return;
-
-                        const lastCluster = clusters[clusters.length - 1];
-                        if (lastCluster && (w.bbox.y0 - lastCluster.yEnd) < 42) {
-                            lastCluster.words.push(clean);
-                            lastCluster.yEnd = Math.max(lastCluster.yEnd, w.bbox.y1);
-                        } else {
-                            clusters.push({ day: col.day, yStart: w.bbox.y0, yEnd: w.bbox.y1, words: [clean] });
-                        }
-                    });
-
-                    clusters.forEach(cl => {
-                        const cleanedName = cleanCourseTitle(cl.words.join(' '));
-                        if (cleanedName.length >= 4) {
-                            rawCandidates.push({ name: cleanedName, day: col.day, startTime: '09:00', endTime: '11:00', hours: 2 });
-                        }
-                    });
-                });
-            } else {
-                let currentDay = 1;
-                lines.forEach(line => {
-                    const txt = (line.text || '').trim();
-                    if (!txt) return;
-                    dayMatchers.forEach(dm => { if (dm.regex.test(txt)) currentDay = dm.day; });
-                    const timeMatch = txt.match(timeRegex);
-                    const cleaned = cleanCourseTitle(txt);
-                    if (cleaned.length >= 4 && !noiseRegex.test(cleaned)) {
-                        const startT = timeMatch && timeMatch[1] ? timeMatch[1].replace('.', ':').padStart(5, '0') : '09:00';
-                        const endT = timeMatch && timeMatch[2] ? timeMatch[2].replace('.', ':').padStart(5, '0') : '11:00';
-                        rawCandidates.push({ name: cleaned, day: currentDay, startTime: startT, endTime: endT, hours: calcHoursBetween(startT, endT) });
-                    }
-                });
-            }
-
-            let merged = [];
-            rawCandidates.forEach(cand => {
-                const existing = merged.find(m => m.day === cand.day && similarityScore(m.name, cand.name) > 0.72);
-                if (existing) {
-                    existing.hours = Math.min(6, existing.hours + 1);
-                } else {
-                    merged.push({
-                        id: Date.now() + Math.random(),
-                        name: cand.name,
-                        day: cand.day,
-                        startTime: cand.startTime,
-                        endTime: cand.endTime,
-                        hours: cand.hours || 2
-                    });
-                }
-            });
-
-            return merged.slice(0, 18);
-        }
-
-        function cleanCourseTitle(raw) {
-            return raw
-                .replace(/\b\d{1,2}[:.]\d{2}(\s*[-–]\s*\d{1,2}[:.]\d{2})?\b/g, '')
-                .replace(/\b[A-ZÇĞİÖŞÜ]{2,5}\s*[-]?\s*\d{3,4}[A-Z]?\b/gi, '')
-                .replace(/\b(Prof|Doç|Dr|Öğr|Gör|Arş|Üyesi|Derslik|Amfi|Lab|Sınıf|Kat|Blok|Şube)\b\.?/gi, '')
-                .replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ\s-]/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-        }
-
-        function calcHoursBetween(s, e) {
-            const [sh] = (s || '09:00').split(':').map(Number);
-            const [eh] = (e || '11:00').split(':').map(Number);
-            const diff = (eh || 11) - (sh || 9);
-            return diff >= 1 && diff <= 6 ? diff : 2;
-        }
-
-        function similarityScore(a, b) {
-            const s1 = a.toLowerCase(), s2 = b.toLowerCase();
-            if (s1 === s2 || s1.includes(s2) || s2.includes(s1)) return 1;
-            const w1 = s1.split(' '), w2 = s2.split(' ');
-            const common = w1.filter(w => w2.includes(w));
-            return common.length / Math.max(w1.length, w2.length);
+        function saveQuickFixKey() {
+            const val = document.getElementById('quickFixApiKey')?.value.trim();
+            if (!val) return;
+            localStorage.setItem('unitool_gemini_key', val);
+            document.getElementById('aiParseStatus').innerHTML = `<span class="text-emerald-400 font-bold">✅ Anahtar kaydedildi! Şimdi fotoğrafı tekrar seçebilirsin.</span>`;
         }
 
         function addEmptyPreviewRow() {

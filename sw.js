@@ -1,4 +1,4 @@
-const CACHE_NAME = 'unitool-static-v4.2';
+const CACHE_NAME = 'unitool-static-v4.3';
 
 const PRECACHE_ASSETS = [
     './',
