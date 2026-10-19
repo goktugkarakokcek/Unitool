@@ -1,5 +1,3 @@
-// netlify/functions/parse-schedule.js
-
 const MODELS_TO_TRY = [
     'gemini-2.5-flash',
     'gemini-2.0-flash',
@@ -46,8 +44,8 @@ exports.handler = async (event) => {
 Görseldeki haftalık ders programını incele ve sadece gerçek dersleri JSON dizisi olarak çıkar.
 
 KESİN KURALLAR:
-1. "name" alanına SADECE dersin temiz Türkçe adını yaz. Ders kodlarını (örn: BIL101, YZO203, AIT101), şube numaralarını, derslik/amfi/lab kodlarını (örn: D-201, Lab-2, UZEM) ve öğretim elemanı isimlerini/unvanlarını (Prof., Doç., Dr., Öğr. Gör.) KESİNLİKLE YAZMA.
-2. Tabloda aynı gün içinde aynı ders alt alta birden fazla saat satırında (örneğin 09:00, 10:00, 11:00 dilimlerinde) tekrar ediyorsa bunları ayrı ayrı döndürme! Tek bir ders olarak birleştir, kaç saat/satır sürüyorsa "hours" alanına toplam saati yaz (örn: 3), ilk başlangıç saatini "startTime", son bitiş saatini "endTime" yap.
+1. "name" alanına SADECE dersin temiz Türkçe adını yaz. Ders kodlarını, şube numaralarını, derslik/amfi/lab kodlarını ve öğretim elemanı isimlerini/unvanlarını KESİNLİKLE YAZMA.
+2. Tabloda aynı gün içinde aynı ders alt alta birden fazla saat satırında tekrar ediyorsa tek bir ders olarak birleştir, "hours" alanına toplam saati yaz (örn: 3).
 3. Gün numaraları: Pazartesi=1, Salı=2, Çarşamba=3, Perşembe=4, Cuma=5, Cumartesi=6, Pazar=0.
 4. Öğle arası veya boş saatleri dahil etme.`;
 
@@ -83,14 +81,14 @@ KESİN KURALLAR:
         for (const apiKey of shuffledKeys) {
             for (const modelName of MODELS_TO_TRY) {
                 try {
-                    const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-                    {
+                    // URL'yi metin olarak birleştiriyoruz ki otomatik linke dönüşüp bozulmasın
+                    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + apiKey;
+                    
+                    const response = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(requestBody)
-                    }
-                );
+                    });
 
                     if (!response.ok) {
                         const errData = await response.json().catch(() => ({}));
