@@ -1,0 +1,20 @@
+{
+  "name": "UniTool - Akademik Kontrol",
+  "short_name": "UniTool",
+  "description": "Üniversite devamsızlık takibi, GPA hedef dağılımı ve vize/final çan hesaplayıcı.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "lang": "tr-TR",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

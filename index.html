@@ -1,0 +1,2354 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#090d16">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="UniTool">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/svg+xml" href="./icon.svg">
+    <link rel="apple-touch-icon" href="./icon.svg">
+    <title>UniTool v4.2 - Akademik Kontrol</title>
+    <style>
+        /* SIFIRLAMA VE TEMEL DEĞİŞKENLER */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border: 0 solid #1e293b; }
+        html { -webkit-text-size-adjust: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { 
+            background-color: #090d16; 
+            color: #f8fafc; 
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+            padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+            overflow-x: hidden;
+        }
+        input, select, textarea { user-select: auto; font-family: inherit; }
+
+        /* GÜVENLİ ALAN & ÇENTİK */
+        header { padding-top: max(0.875rem, calc(env(safe-area-inset-top) + 0.5rem)) !important; }
+        #sideDrawer { padding-top: max(1.25rem, calc(env(safe-area-inset-top) + 0.75rem)) !important; }
+
+        /* YERLEŞİM VE DÜZEN */
+        .fixed { position: fixed; }
+        .sticky { position: sticky; }
+        .relative { position: relative; }
+        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+        .top-0 { top: 0; }
+        .bottom-6 { bottom: 1.5rem; }
+        .left-0 { left: 0; }
+        .left-4 { left: 1rem; }
+        .right-4 { right: 1rem; }
+        .z-20 { z-index: 20; }
+        .z-30 { z-index: 30; }
+        .z-40 { z-index: 40; }
+        .z-50 { z-index: 50; }
+
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .hidden { display: none !important; }
+        .flex-col { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .flex-1 { flex: 1 1 0%; }
+        .shrink-0 { flex-shrink: 0; }
+
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+        .gap-1 { gap: 0.25rem; }
+        .gap-1\.5 { gap: 0.375rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-2\.5 { gap: 0.625rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+
+        .space-y-1 > * + * { margin-top: 0.25rem; }
+        .space-y-1\.5 > * + * { margin-top: 0.375rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-2\.5 > * + * { margin-top: 0.625rem; }
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-5 > * + * { margin-top: 1.25rem; }
+
+        .max-w-md { max-width: 28rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .w-full { width: 100%; }
+        .w-5 { width: 1.25rem; }
+        .w-10 { width: 2.5rem; }
+        .w-14 { width: 3.5rem; }
+        .w-16 { width: 4rem; }
+        .w-20 { width: 5rem; }
+        .w-36 { width: 9rem; }
+        .w-72 { width: 18rem; }
+        .h-full { height: 100%; }
+        .h-5 { height: 1.25rem; }
+        .h-10 { height: 2.5rem; }
+        .h-2\.5 { height: 0.625rem; }
+        .max-h-\[60vh\] { max-height: 60vh; }
+        .overflow-y-auto { overflow-y: auto; }
+
+        /* BOŞLUKLAR */
+        .p-0 { padding: 0; }
+        .p-1 { padding: 0.25rem; }
+        .p-1\.5 { padding: 0.375rem; }
+        .p-2 { padding: 0.5rem; }
+        .p-2\.5 { padding: 0.625rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-3\.5 { padding: 0.875rem; }
+        .p-4 { padding: 1rem; }
+        .p-5 { padding: 1.25rem; }
+        .p-6 { padding: 1.5rem; }
+
+        .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+        .px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+
+        .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-3\.5 { padding-top: 0.875rem; padding-bottom: 0.875rem; }
+        .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+
+        .-ml-1 { margin-left: -0.25rem; }
+        .mt-0\.5 { margin-top: 0.125rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-5 { margin-top: 1.25rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-2\.5 { margin-bottom: 0.625rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-5 { margin-bottom: 1.25rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        .pt-1 { padding-top: 0.25rem; }
+        .pt-2 { padding-top: 0.5rem; }
+        .pt-3 { padding-top: 0.75rem; }
+        .pt-4 { padding-top: 1rem; }
+        .pb-2\.5 { padding-bottom: 0.625rem; }
+        .pb-3 { padding-bottom: 0.75rem; }
+        .pb-4 { padding-bottom: 1rem; }
+        .pl-2 { padding-left: 0.5rem; }
+
+        /* TİPOGRAFİ */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+        .text-\[10px\] { font-size: 10px; }
+        .text-\[11px\] { font-size: 11px; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+
+        .font-normal { font-weight: 400; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .font-black { font-weight: 900; }
+        .uppercase { text-transform: uppercase; }
+        .underline { text-decoration: underline; }
+        .leading-none { line-height: 1; }
+        .leading-snug { line-height: 1.375; }
+        .leading-relaxed { line-height: 1.625; }
+        .leading-tight { line-height: 1.25; }
+        .tracking-tight { letter-spacing: -0.025em; }
+        .tracking-wider { letter-spacing: 0.05em; }
+        .block { display: block; }
+
+        /* RENKLER VE ARKA PLANLAR */
+        .text-white { color: #ffffff; }
+        .text-slate-100 { color: #f1f5f9; }
+        .text-slate-200 { color: #e2e8f0; }
+        .text-slate-300 { color: #cbd5e1; }
+        .text-slate-400 { color: #94a3b8; }
+        .text-slate-500 { color: #64748b; }
+        .text-indigo-200 { color: #c7d2fe; }
+        .text-indigo-300 { color: #a5b4fc; }
+        .text-indigo-400 { color: #818cf8; }
+        .text-indigo-700 { color: #4338ca; }
+        .text-emerald-300 { color: #6ee7b7; }
+        .text-emerald-400 { color: #34d399; }
+        .text-amber-300 { color: #fcd34d; }
+        .text-amber-400 { color: #fbbf24; }
+        .text-rose-300 { color: #fda4af; }
+        .text-rose-400 { color: #fb7185; }
+        .text-rose-500 { color: #f43f5e; }
+
+        .bg-slate-900 { background-color: #0f172a; }
+        .bg-slate-900\/90 { background-color: rgba(15, 23, 42, 0.9); }
+        .bg-slate-950 { background-color: #020617; }
+        .bg-slate-950\/80 { background-color: rgba(2, 6, 23, 0.8); }
+        .bg-slate-800 { background-color: #1e293b; }
+        .bg-slate-800\/80 { background-color: rgba(30, 41, 59, 0.8); }
+        .bg-indigo-600 { background-color: #4f46e5; }
+        .bg-indigo-950\/30 { background-color: rgba(30, 27, 75, 0.3); }
+        .bg-indigo-950\/40 { background-color: rgba(30, 27, 75, 0.4); }
+        .bg-emerald-500 { background-color: #10b981; }
+        .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.1); }
+        .bg-emerald-500\/15 { background-color: rgba(16, 185, 129, 0.15); }
+        .bg-emerald-500\/20 { background-color: rgba(16, 185, 129, 0.2); }
+        .bg-emerald-600 { background-color: #059669; }
+        .bg-amber-500 { background-color: #f59e0b; }
+        .bg-amber-500\/10 { background-color: rgba(245, 158, 11, 0.1); }
+        .bg-amber-500\/15 { background-color: rgba(245, 158, 11, 0.15); }
+        .bg-amber-500\/20 { background-color: rgba(245, 158, 11, 0.2); }
+        .bg-rose-500 { background-color: #f43f5e; }
+        .bg-rose-500\/10 { background-color: rgba(244, 63, 94, 0.1); }
+        .bg-rose-500\/15 { background-color: rgba(244, 63, 94, 0.15); }
+        .bg-rose-500\/20 { background-color: rgba(244, 63, 94, 0.2); }
+        .bg-rose-950\/40 { background-color: rgba(76, 5, 25, 0.4); }
+        .bg-black\/70 { background-color: rgba(0, 0, 0, 0.7); }
+        .bg-black\/75 { background-color: rgba(0, 0, 0, 0.75); }
+        .bg-\[\#090d16\]\/90 { background-color: rgba(9, 13, 22, 0.9); }
+        .bg-gradient-to-br { background-image: linear-gradient(to bottom right, rgba(30, 27, 75, 0.7), #0f172a); }
+
+        /* KENARLIKLAR */
+        .border { border-width: 1px; }
+        .border-t { border-top-width: 1px; }
+        .border-r { border-right-width: 1px; }
+        .border-b { border-bottom-width: 1px; }
+        .border-slate-800 { border-color: #1e293b; }
+        .border-slate-800\/80 { border-color: rgba(30, 41, 59, 0.8); }
+        .border-slate-800\/90 { border-color: rgba(30, 41, 59, 0.9); }
+        .border-indigo-400\/30 { border-color: rgba(129, 140, 248, 0.3); }
+        .border-indigo-500\/30 { border-color: rgba(99, 102, 241, 0.3); }
+        .border-indigo-500\/40 { border-color: rgba(99, 102, 241, 0.4); }
+        .border-indigo-500\/50 { border-color: rgba(99, 102, 241, 0.5); }
+        .border-indigo-500\/60 { border-color: rgba(99, 102, 241, 0.6); }
+        .border-indigo-800\/40 { border-color: rgba(55, 48, 163, 0.4); }
+        .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.2); }
+        .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.3); }
+        .border-amber-500\/30 { border-color: rgba(245, 158, 11, 0.3); }
+        .border-amber-500\/40 { border-color: rgba(245, 158, 11, 0.4); }
+        .border-rose-500\/20 { border-color: rgba(244, 63, 94, 0.2); }
+        .border-rose-500\/30 { border-color: rgba(244, 63, 94, 0.3); }
+        .border-rose-500\/40 { border-color: rgba(244, 63, 94, 0.4); }
+        .border-rose-800\/50 { border-color: rgba(159, 18, 57, 0.5); }
+        .border-dashed { border-style: dashed; }
+
+        .divide-x > * + * { border-left-width: 1px; }
+        .divide-slate-800 > * + * { border-left-color: #1e293b; }
+
+        /* KÖŞE YUVARLAMA */
+        .rounded { border-radius: 0.25rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-full { border-radius: 9999px; }
+
+        /* GÖLGE, EFEKTLER VE ANİMASYONLAR */
+        .shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2); }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
+        .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        .backdrop-blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+        .backdrop-blur-md { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .opacity-0 { opacity: 0; }
+        .overflow-hidden { overflow: hidden; }
+
+        .transition { transition: all 0.15s ease-in-out; }
+        .transition-opacity { transition: opacity 0.2s ease-in-out; }
+        .transition-all { transition: all 0.3s ease-in-out; }
+        .duration-300 { transition-duration: 300ms; }
+        .active\:scale-90:active { transform: scale(0.9); }
+        .active\:scale-95:active { transform: scale(0.95); }
+        .active\:scale-98:active { transform: scale(0.98); }
+
+        .drawer-transition { transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1); }
+        .-translate-x-full { transform: translateX(-100%); }
+        .translate-x-0 { transform: translateX(0); }
+        .translate-y-10 { transform: translateY(2.5rem); }
+
+        input:focus, select:focus { outline: none; border-color: #6366f1 !important; }
+        button { cursor: pointer; background: transparent; }
+
+        #netlify-badge, a[href*="netlify.com/experimental"] { display: none !important; opacity: 0 !important; pointer-events: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Sol Yana Kayan Menü (Backdrop) -->
+    <div id="drawerBackdrop" onclick="toggleDrawer(false)" 
+        class="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm hidden opacity-0 transition-opacity"></div>
+
+    <!-- Sol Yana Kayan Menü (Drawer) -->
+    <aside id="sideDrawer" 
+        class="fixed top-0 left-0 z-50 h-full w-72 bg-slate-900 border-r border-slate-800 -translate-x-full drawer-transition flex flex-col justify-between p-5">
+        <div>
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <span class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg text-sm font-black">UT</span>
+                    <div>
+                        <span class="font-bold text-white text-base block leading-none">UniTool</span>
+                        <span class="text-[11px] text-slate-400 mt-1 block">v4.2 Hibrit Motor</span>
+                    </div>
+                </div>
+                <button type="button" onclick="toggleDrawer(false)" class="text-slate-400 p-1 text-2xl leading-none">&times;</button>
+            </div>
+
+            <nav class="mt-6 space-y-2">
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 px-2 mb-2">Modüller</p>
+                
+                <button type="button" onclick="switchTab('attendance')" id="nav-attendance"
+                    class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition bg-indigo-600 text-white shadow-lg" style="background:#4f46e5;">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    Devamsızlık Takibi
+                </button>
+
+                <button type="button" onclick="switchTab('schedule')" id="nav-schedule"
+                    class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition text-slate-300">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Haftalık Program
+                </button>
+
+                <button type="button" onclick="switchTab('gpa')" id="nav-gpa"
+                    class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition text-slate-300">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                    </svg>
+                    GPA & Hedef Hesaplayıcı
+                </button>
+
+                <button type="button" onclick="switchTab('exam')" id="nav-exam"
+                    class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition text-slate-300">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    Vize / Final & Çan
+                </button>
+            </nav>
+
+            <div class="mt-6 pt-4 border-t border-slate-800 space-y-2">
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 px-2 mb-1">Otomasyon & Yedekleme</p>
+                <button type="button" onclick="syncScheduleToAttendance(true)" 
+                    class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 transition">
+                    ⚡ Programı Devamsızlığa Eşitle
+                </button>
+                <button type="button" onclick="exportScheduleToICS()" 
+                    class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-amber-300 bg-amber-500/10 border border-amber-500/30 transition">
+                    📲 iPhone Yoklama Alarmı Kur (.ics)
+                </button>
+                <div class="grid grid-cols-2 gap-1.5 pt-1">
+                    <button type="button" onclick="exportAllDataJSON()" 
+                        class="text-center px-2 py-2 rounded-xl text-[11px] font-semibold text-indigo-300 bg-slate-800 border border-slate-800">
+                        📥 Yedek İndir
+                    </button>
+                    <label class="text-center px-2 py-2 rounded-xl text-[11px] font-semibold text-indigo-300 bg-slate-800 border border-slate-800" style="cursor:pointer;">
+                        📤 Yedek Yükle
+                        <input type="file" accept=".json" class="hidden" onchange="importAllDataJSON(event)">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+            UniTool v4.2 &bull; 3 Katmanlı Hibrit Sistem
+        </div>
+    </aside>
+
+    <!-- Üst Bar -->
+    <header class="sticky top-0 z-20 bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800 px-4 py-3.5">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="toggleDrawer(true)" class="p-2 -ml-1 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 active:scale-95 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white leading-none">UniTool</h1>
+                    <p id="headerSubtitle" class="text-[11px] text-indigo-400 font-medium mt-1">Devamsızlık Takibi</p>
+                </div>
+            </div>
+
+            <button id="headerActionBtn" type="button" onclick="handleHeaderAction()" 
+                class="bg-indigo-600 active:scale-95 transition text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl shadow-lg" style="background:#4f46e5;">
+                + Yeni Ders
+            </button>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK ALANI -->
+    <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
+
+        <!-- GÜNLÜK AKILLI YOKLAMA BİLDİRİM KARTI -->
+        <div id="dailyCheckinBanner" class="hidden bg-gradient-to-br border border-indigo-500/40 rounded-2xl p-4 shadow-lg space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">🔔 Bugünün Yoklama Kontrolü</span>
+                <span id="dailyCheckinDayName" class="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">Bugün</span>
+            </div>
+            <p class="text-xs text-slate-300">Bugünkü derslerine katıldın mı? ("Gitmedim" seçersen devamsızlığına otomatik eklenir.)</p>
+            <div id="dailyCheckinList" class="space-y-2"></div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODÜL 1: DEVAMSIZLIK TAKİBİ                -->
+        <!-- ========================================== -->
+        <section id="view-attendance">
+            <div id="summaryBar" class="grid grid-cols-3 gap-2 mb-5 hidden">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-center">
+                    <span class="text-xs text-slate-400 block">Toplam Ders</span>
+                    <span id="statTotal" class="text-lg font-bold text-white">0</span>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-center">
+                    <span class="text-xs text-slate-400 block">Sınırda / Riskli</span>
+                    <span id="statRisk" class="text-lg font-bold text-amber-400">0</span>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-center">
+                    <span class="text-xs text-slate-400 block">Kalan Ders</span>
+                    <span id="statFailed" class="text-lg font-bold text-rose-500">0</span>
+                </div>
+            </div>
+
+            <div id="courseList" class="space-y-4"></div>
+
+            <div id="emptyState" class="text-center py-12 px-4 border border-dashed border-slate-800 rounded-2xl mt-4 space-y-3">
+                <p class="text-slate-400 text-sm">Henüz takip edilen bir ders yok.</p>
+                <div class="flex justify-center gap-2">
+                    <button type="button" onclick="switchTab('schedule')" class="bg-indigo-600 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl" style="background:#4f46e5;">
+                        📸 Fotoğraftan Program Yükle
+                    </button>
+                    <button type="button" onclick="toggleAttendanceModal()" class="bg-slate-800 text-slate-200 text-xs font-semibold px-3.5 py-2.5 rounded-xl">
+                        + Elle Ders Ekle
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MODÜL 2: HAFTALIK PROGRAM & HİBRİT TARAMA  -->
+        <!-- ========================================== -->
+        <section id="view-schedule" class="hidden space-y-5">
+
+            <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl p-4 space-y-3 shadow-lg">
+                <div>
+                    <h2 class="text-sm font-bold text-white">📸 Fotoğraftan Otomatik Program</h2>
+                    <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                        Ders programı ekran görüntüsünü seç; hibrit motor (Gizli Bulut AI + Çoklu Anahtar + Yerel OCR) tabloyu otomatik çıkarsın.
+                    </p>
+                </div>
+
+                <div class="flex gap-2">
+                    <label class="flex-1 bg-indigo-600 text-white text-xs font-bold py-3 px-3 rounded-xl text-center shadow active:scale-98 transition" style="background:#4f46e5; cursor:pointer;">
+                        🖼️ Program Fotoğrafı Seç ve Otomatik Tara
+                        <input type="file" id="schedulePhotoInput" accept="image/*" class="hidden" onchange="handleSchedulePhotoUpload(event)">
+                    </label>
+                </div>
+
+                <div id="aiParseStatus" class="hidden text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 space-y-2"></div>
+
+                <!-- Çıkarılan Derslerin Onay ve Düzenleme Kutusu -->
+                <div id="aiPreviewContainer" class="hidden space-y-2.5 pt-2 border-t border-slate-800">
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs font-bold text-emerald-400">✅ Tespit Edilen Dersler (Kontrol Et):</p>
+                        <button type="button" onclick="addEmptyPreviewRow()" class="text-[11px] text-indigo-400 font-semibold">+ Satır Ekle</button>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Varsa ders adı, gün veya saat bilgisini kutulardan düzenleyip onaylayabilirsin:</p>
+                    <div id="aiPreviewList" class="space-y-1.5 max-h-[60vh] overflow-y-auto"></div>
+                    <button type="button" onclick="confirmAiScheduleImport()" 
+                        class="w-full bg-emerald-600 text-white text-xs font-bold py-3 rounded-xl shadow active:scale-98 transition" style="background:#059669;">
+                        Onayla ve Devamsızlık Sistemine Eşitle
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bildirim ve iPhone Alarm Kurulum Kartı -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">🔔 Günlük Yoklama Bildirimleri</span>
+                    <span id="notifStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Kontrol Ediliyor</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    Her ders günü yoklama sorusu alabilmek için bildirim izni verebilir veya iPhone'da <strong>%100 garantili kilit ekranı alarmı</strong> için programı tek tıkla Takvime aktarabilirsin.
+                </p>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button type="button" onclick="requestNotifPermission()" class="bg-slate-800 text-indigo-300 text-xs font-semibold py-2 px-3 rounded-xl border border-slate-800">
+                        🔔 Bildirim İzni Ver
+                    </button>
+                    <button type="button" onclick="exportScheduleToICS()" class="bg-amber-500/15 text-amber-300 text-xs font-bold py-2 px-3 rounded-xl border border-amber-500/30">
+                        📲 iPhone Alarmı Kur (.ics)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gün Seçici Sekmeler (Pzt - Paz) -->
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-sm font-bold text-white">Haftalık Ders Programı</h3>
+                    <button type="button" onclick="syncScheduleToAttendance(true)" class="text-xs text-emerald-400 font-semibold">
+                        ⚡ Devamsızlığa Eşitle
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-7 gap-1 bg-slate-900 border border-slate-800 p-1 rounded-xl mb-3" id="daySelectorBar"></div>
+                <div id="scheduleDayList" class="space-y-2.5"></div>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MODÜL 3: GPA & HEDEF HESAPLAYICI           -->
+        <!-- ========================================== -->
+        <section id="view-gpa" class="hidden space-y-5">
+            <div class="bg-gradient-to-br border border-indigo-500/30 rounded-2xl p-4 shadow-lg">
+                <div class="grid grid-cols-3 gap-2 text-center divide-x divide-slate-800">
+                    <div>
+                        <span class="text-[11px] text-slate-400 block">Dönem (YANO)</span>
+                        <span id="gpaSemesterVal" class="text-2xl font-black text-white">0.00</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 block">Genel (GANO)</span>
+                        <span id="gpaCumulativeVal" class="text-2xl font-black text-indigo-400">0.00</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 block">Bu Dönem AKTS</span>
+                        <span id="gpaTotalCredits" class="text-2xl font-black text-emerald-400">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Hesaplama & Hedef Ayarları</h2>
+                    <select id="scaleSelect" onchange="saveGpaSettings()" 
+                        class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-200">
+                        <option value="standard">AA / BA / BB (0.5 Katsayı)</option>
+                        <option value="plusminus">A / A- / B+ (4.0 - 3.7 - 3.3)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2.5 pt-1">
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Geçmiş AKTS</label>
+                        <input type="number" id="prevCredits" min="0" max="300" step="1" value="0" oninput="saveGpaSettings()"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Mevcut GANO</label>
+                        <input type="number" id="prevGpa" min="0" max="4" step="0.01" value="0" oninput="saveGpaSettings()"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-indigo-400 font-bold mb-1">Hedef GANO</label>
+                        <input type="number" id="targetGpa" min="0" max="4" step="0.01" value="3.00" oninput="saveGpaSettings()"
+                            class="w-full bg-indigo-950/40 border border-indigo-500/50 rounded-xl px-3 py-2 text-sm text-white font-bold">
+                    </div>
+                </div>
+            </div>
+
+            <div id="targetAdvisorBox" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5 hidden">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">🎯 Hedef GPA Analizi</span>
+                    <span id="targetStatusBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full"></span>
+                </div>
+                <div id="targetAdvisorText" class="text-xs text-slate-300 leading-relaxed"></div>
+                <div id="targetRecommendations" class="space-y-1.5 pt-1"></div>
+            </div>
+
+            <div class="flex justify-between items-center pt-1">
+                <h3 class="text-sm font-bold text-white">Dönem Dersleri & Harf Notları</h3>
+                <div class="flex gap-2 items-center">
+                    <button type="button" onclick="importCoursesToGPA()" class="text-xs text-indigo-400 font-medium">İçe Aktar</button>
+                    <span class="text-slate-500 text-xs">|</span>
+                    <button type="button" onclick="addGpaCourseRow()" class="text-xs text-emerald-400 font-semibold">+ Ders Ekle</button>
+                </div>
+            </div>
+
+            <div id="gpaCourseList" class="space-y-2.5"></div>
+
+            <div id="gpaEmptyState" class="text-center py-12 px-4 border border-dashed border-slate-800 rounded-2xl">
+                <p class="text-slate-400 text-xs mb-3">GPA hesabı için henüz ders eklenmedi.</p>
+                <div class="flex justify-center gap-3">
+                    <button type="button" onclick="importCoursesToGPA()" class="bg-slate-800 text-indigo-300 text-xs font-semibold px-3.5 py-2 rounded-xl">Devamsızlıktan Aktar</button>
+                    <button type="button" onclick="addGpaCourseRow()" class="bg-indigo-600 text-white text-xs font-semibold px-3.5 py-2 rounded-xl" style="background:#4f46e5;">+ Yeni Ders Ekle</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MODÜL 4: VİZE / FİNAL & ÇAN HESAPLAYICI    -->
+        <!-- ========================================== -->
+        <section id="view-exam" class="hidden space-y-5">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-1.5 grid grid-cols-2 gap-1.5">
+                <button type="button" id="btnModeAbsolute" onclick="setExamMode('absolute')"
+                    class="py-2.5 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow" style="background:#4f46e5;">
+                    📏 Mutlak Sistem (Sabit)
+                </button>
+                <button type="button" id="btnModeCurve" onclick="setExamMode('curve')"
+                    class="py-2.5 rounded-xl text-xs font-bold transition text-slate-400">
+                    🔔 Çan Eğrisi (Bağıl / T-Skor)
+                </button>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Ders & Not Parametreleri</span>
+                    <select id="examCourseQuickSelect" onchange="loadCourseIntoExam(this.value)"
+                        class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-indigo-300">
+                        <option value="">Kayıtlı Dersten Seç...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Ders Adı (Kaydetmek İçin)</label>
+                    <input type="text" id="examCourseName" placeholder="Örn: Veri Yapıları"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-2.5">
+                        <span class="text-[11px] font-semibold text-indigo-400 block mb-2">1. Vize Sınavı</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Notun</label>
+                                <input type="number" id="midtermScore" min="0" max="100" value="65" oninput="calculateExamRequirements()"
+                                    class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-sm font-bold text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Etki (%)</label>
+                                <input type="number" id="midtermWeight" min="1" max="99" value="40" oninput="autoAdjustFinalWeight()"
+                                    class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-sm font-semibold text-slate-300">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-2.5">
+                        <span class="text-[11px] font-semibold text-emerald-400 block mb-2">2. Ödev / Lab / Quiz</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Notun</label>
+                                <input type="number" id="extraScore" min="0" max="100" value="80" oninput="calculateExamRequirements()"
+                                    class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-sm font-bold text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 mb-1">Etki (%)</label>
+                                <input type="number" id="extraWeight" min="0" max="90" value="0" oninput="autoAdjustFinalWeight()"
+                                    class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-sm font-semibold text-slate-300">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Final Ağırlığı (%)</label>
+                        <input type="number" id="finalWeight" min="1" max="100" value="60" oninput="calculateExamRequirements()"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-amber-400 font-semibold mb-1">Final Geçme Barajı</label>
+                        <input type="number" id="finalCutoff" min="0" max="100" value="50" oninput="calculateExamRequirements()"
+                            class="w-full bg-slate-950 border border-amber-500/40 rounded-xl px-3 py-2 text-sm text-amber-300 font-bold">
+                    </div>
+                </div>
+
+                <div id="curveParamsBox" class="hidden bg-indigo-950/30 border border-indigo-500/30 rounded-xl p-3 space-y-2.5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-indigo-300">🔔 Sınıf Çan Parametreleri (T-Skoru)</span>
+                        <span class="text-[10px] text-indigo-400">T = 50 + 10·(X - μ)/σ</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-300 mb-1">Sınıf Ortalaması (μ)</label>
+                            <input type="number" id="classMean" min="10" max="95" value="45" oninput="calculateExamRequirements()"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-sm text-white font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-300 mb-1">Standart Sapma (σ)</label>
+                            <input type="number" id="classStdDev" min="2" max="40" value="15" oninput="calculateExamRequirements()"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-sm text-white font-bold">
+                        </div>
+                    </div>
+                </div>
+
+                <p id="weightWarning" class="hidden text-xs text-rose-400 font-semibold bg-rose-950/40 border border-rose-800/50 rounded-lg px-3 py-2"></p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center">
+                <div>
+                    <span class="text-[11px] text-slate-400 block">Final Öncesi Cepteki Puan</span>
+                    <span id="currentWeightedScore" class="text-xl font-black text-white">26.00 <span class="text-xs font-normal text-slate-500">/ 100</span></span>
+                </div>
+                <button type="button" onclick="saveExamRecord()" class="bg-emerald-600 active:scale-95 transition text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow" style="background:#059669;">
+                    💾 Hesabı Kaydet
+                </button>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Hedef Harf İçin Gereken Final Notu</h3>
+                    <span id="cutoffNotice" class="text-[11px] text-amber-400 font-medium">Baraj: 50</span>
+                </div>
+                <div id="examRequirementsList" class="space-y-2"></div>
+            </div>
+
+            <div id="savedExamsWrapper" class="space-y-2.5 hidden">
+                <h3 class="text-sm font-bold text-white pt-2">Kayıtlı Vize / Final Derslerin</h3>
+                <div id="savedExamsList" class="space-y-2"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- DEVAMSIZLIK DERS EKLEME MODALI -->
+    <div id="courseModal" class="fixed inset-0 z-30 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-bold text-white">Yeni Devamsızlık Dersi</h2>
+                <button type="button" onclick="toggleAttendanceModal()" class="text-slate-400 text-2xl leading-none">&times;</button>
+            </div>
+
+            <form id="courseForm" onsubmit="addAttendanceCourse(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Ders Adı</label>
+                    <input type="text" id="courseName" required placeholder="Örn: Makine Öğrenmesi" 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Haftalık Ders Saati</label>
+                        <input type="number" id="weeklyHours" required min="1" max="20" value="3" oninput="updatePreview()"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Dönem Hafta Sayısı</label>
+                        <input type="number" id="totalWeeks" required min="1" max="30" value="14" oninput="updatePreview()"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-medium text-slate-300">Devam Zorunluluğu (%)</label>
+                        <span id="allowanceText" class="text-xs font-semibold text-indigo-400">Devamsızlık Hakkı: %30</span>
+                    </div>
+                    <input type="number" id="reqAttendance" required min="1" max="100" value="70" oninput="updatePreview()"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                </div>
+
+                <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 text-xs space-y-1 text-slate-300">
+                    <div class="flex justify-between">
+                        <span>Dönemlik Toplam Saat:</span>
+                        <span id="prevTotal" class="font-bold text-white">42 Saat</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Matematiksel Sınır:</span>
+                        <span id="prevExact" class="text-slate-400">12.6 Saat</span>
+                    </div>
+                    <div class="flex justify-between border-t border-slate-800 pt-1 mt-1">
+                        <span class="text-emerald-400 font-medium">Güvenli Devamsızlık Hakkı:</span>
+                        <span id="prevSafe" class="font-bold text-emerald-400">Maks. 12 Saat</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 active:scale-98 transition text-white font-semibold py-3 rounded-xl shadow-lg" style="background:#4f46e5;">
+                    Dersi Kaydet
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- HAFTALIK PROGRAMA DERS EKLEME MODALI -->
+    <div id="scheduleModal" class="fixed inset-0 z-30 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-bold text-white">Programa Ders Ekle</h2>
+                <button type="button" onclick="toggleScheduleModal()" class="text-slate-400 text-2xl leading-none">&times;</button>
+            </div>
+
+            <form id="scheduleForm" onsubmit="addScheduleItemManual(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Ders Adı</label>
+                    <input type="text" id="schedCourseName" required placeholder="Örn: Yapay Zeka" 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Gün</label>
+                        <select id="schedDay" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white">
+                            <option value="1">Pazartesi</option>
+                            <option value="2">Salı</option>
+                            <option value="3">Çarşamba</option>
+                            <option value="4">Perşembe</option>
+                            <option value="5">Cuma</option>
+                            <option value="6">Cumartesi</option>
+                            <option value="0">Pazar</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Kaç Saat Sürüyor?</label>
+                        <input type="number" id="schedHours" required min="1" max="10" value="2"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Başlangıç Saati</label>
+                        <input type="time" id="schedStart" required value="09:00"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Bitiş Saati</label>
+                        <input type="time" id="schedEnd" required value="11:00"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 active:scale-98 transition text-white font-semibold py-3 rounded-xl shadow-lg" style="background:#4f46e5;">
+                    Programa ve Devamsızlığa Ekle
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Otomatik Güncelleme Bildirim Kutusu -->
+    <div id="updateToast" class="fixed bottom-6 left-4 right-4 max-w-md mx-auto bg-indigo-600 text-white p-3.5 rounded-2xl shadow-xl flex items-center justify-between border border-indigo-400/30 hidden z-50 translate-y-10 transition duration-300" style="background:#4f46e5;">
+        <div class="flex items-center gap-2.5">
+            <span class="text-lg">🚀</span>
+            <div>
+                <p class="text-xs font-bold leading-tight">Yeni Güncelleme Hazır!</p>
+                <p class="text-[11px] text-indigo-200">Değişiklikleri görmek için yenile.</p>
+            </div>
+        </div>
+        <button id="updateBtn" type="button" class="bg-white text-indigo-700 text-xs font-black px-3.5 py-1.5 rounded-xl active:scale-95 transition shadow" style="background:#ffffff;">
+            Yenile
+        </button>
+    </div>
+
+    <script>
+        // ============================================================================
+        // KATMAN 2 YEDEK ANAHTAR HAVUZU (İSTEĞE BAĞLI - SÜRÜKLE BIRAK KULLANIMI İÇİN)
+        // Netlify Environment Variables kullanıyorsan burayı boş bırakabilirsin.
+        // Eğer GitHub/CLI bağlamadan doğrudan klasör sürükle-bırak yapıyorsan,
+        // buraya 1, 2 veya 3 adet ücretsiz Gemini API anahtarı yazabilirsin:
+        // Örn: const CLIENT_KEY_POOL = ["AIzaSyBirinci...", "AIzaSyIkinci..."];
+        // ============================================================================
+        const CLIENT_KEY_POOL = [];
+
+        // --- VERİ YAPILARI ---
+        let activeTab = 'attendance';
+        let examMode = 'absolute';
+        let selectedDay = new Date().getDay();
+        if (selectedDay === 0) selectedDay = 1;
+
+        let courses = JSON.parse(localStorage.getItem('unitool_courses')) || [];
+        let scheduleItems = JSON.parse(localStorage.getItem('unitool_schedule')) || [];
+        let attendanceLogs = JSON.parse(localStorage.getItem('unitool_att_logs')) || {};
+        let gpaCourses = JSON.parse(localStorage.getItem('unitool_gpa_courses')) || [];
+        let savedExams = JSON.parse(localStorage.getItem('unitool_saved_exams')) || [];
+        let pendingAiItems = [];
+
+        let gpaSettings = JSON.parse(localStorage.getItem('unitool_gpa_settings')) || {
+            scale: 'standard',
+            prevCredits: 0,
+            prevGpa: 0,
+            targetGpa: 3.00
+        };
+
+        const DAY_NAMES = {
+            1: { short: 'Pzt', full: 'Pazartesi' },
+            2: { short: 'Sal', full: 'Salı' },
+            3: { short: 'Çar', full: 'Çarşamba' },
+            4: { short: 'Per', full: 'Perşembe' },
+            5: { short: 'Cum', full: 'Cuma' },
+            6: { short: 'Cmt', full: 'Cumartesi' },
+            0: { short: 'Paz', full: 'Pazar' }
+        };
+        const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+        const GRADE_SCALES = {
+            standard: [
+                { label: 'AA', value: 4.0 }, { label: 'BA', value: 3.5 }, { label: 'BB', value: 3.0 },
+                { label: 'CB', value: 2.5 }, { label: 'CC', value: 2.0 }, { label: 'DC', value: 1.5 },
+                { label: 'DD', value: 1.0 }, { label: 'FD', value: 0.5 }, { label: 'FF', value: 0.0 }
+            ],
+            plusminus: [
+                { label: 'A', value: 4.0 }, { label: 'A-', value: 3.7 }, { label: 'B+', value: 3.3 },
+                { label: 'B', value: 3.0 }, { label: 'B-', value: 2.7 }, { label: 'C+', value: 2.3 },
+                { label: 'C', value: 2.0 }, { label: 'C-', value: 1.7 }, { label: 'D+', value: 1.3 },
+                { label: 'D', value: 1.0 }, { label: 'F', value: 0.0 }
+            ]
+        };
+
+        const EXAM_THRESHOLDS = [
+            { letter: 'AA', gpaVal: 4.0, absMin: 90, tScoreMin: 67 },
+            { letter: 'BA', gpaVal: 3.5, absMin: 85, tScoreMin: 62 },
+            { letter: 'BB', gpaVal: 3.0, absMin: 80, tScoreMin: 57 },
+            { letter: 'CB', gpaVal: 2.5, absMin: 70, tScoreMin: 52 },
+            { letter: 'CC', gpaVal: 2.0, absMin: 60, tScoreMin: 47 },
+            { letter: 'DC', gpaVal: 1.5, absMin: 55, tScoreMin: 42 },
+            { letter: 'DD', gpaVal: 1.0, absMin: 50, tScoreMin: 37 }
+        ];
+
+        // --- YAN MENÜ YÖNETİMİ ---
+        function toggleDrawer(open) {
+            const drawer = document.getElementById('sideDrawer');
+            const backdrop = document.getElementById('drawerBackdrop');
+            if (!drawer || !backdrop) return;
+
+            if (open) {
+                backdrop.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    backdrop.classList.remove('opacity-0');
+                    drawer.classList.remove('-translate-x-full');
+                    drawer.classList.add('translate-x-0');
+                });
+            } else {
+                backdrop.classList.add('opacity-0');
+                drawer.classList.remove('translate-x-0');
+                drawer.classList.add('-translate-x-full');
+                setTimeout(() => backdrop.classList.add('hidden'), 280);
+            }
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            const views = ['attendance', 'schedule', 'gpa', 'exam'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.toggle('hidden', v !== tab);
+
+                const navBtn = document.getElementById(`nav-${v}`);
+                if (navBtn) {
+                    if (v === tab) {
+                        navBtn.className = 'w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition bg-indigo-600 text-white shadow-lg';
+                        navBtn.style.background = '#4f46e5';
+                    } else {
+                        navBtn.className = 'w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition text-slate-300';
+                        navBtn.style.background = 'transparent';
+                    }
+                }
+            });
+
+            const subtitle = document.getElementById('headerSubtitle');
+            const actionBtn = document.getElementById('headerActionBtn');
+
+            if (tab === 'attendance') {
+                subtitle.innerText = 'Devamsızlık Takibi';
+                actionBtn.innerText = '+ Yeni Ders';
+                renderCourses();
+            } else if (tab === 'schedule') {
+                subtitle.innerText = 'Haftalık Program';
+                actionBtn.innerText = '+ Ders Ekle';
+                renderScheduleView();
+            } else if (tab === 'gpa') {
+                subtitle.innerText = 'GPA & Hedef Hesaplayıcı';
+                actionBtn.innerText = '+ Ders Ekle';
+                renderGpaView();
+            } else if (tab === 'exam') {
+                subtitle.innerText = 'Vize / Final & Çan';
+                actionBtn.innerText = 'Sıfırla';
+                initExamView();
+            }
+            renderDailyCheckinBanner();
+            toggleDrawer(false);
+        }
+
+        function handleHeaderAction() {
+            if (activeTab === 'attendance') toggleAttendanceModal();
+            else if (activeTab === 'schedule') toggleScheduleModal();
+            else if (activeTab === 'gpa') addGpaCourseRow();
+            else if (activeTab === 'exam') resetExamCalculator();
+        }
+
+        // --- JSON YEDEKLEME VE GERİ YÜKLEME ---
+        function exportAllDataJSON() {
+            const payload = {
+                version: '4.2',
+                exportedAt: new Date().toISOString(),
+                courses,
+                scheduleItems,
+                attendanceLogs,
+                gpaCourses,
+                gpaSettings,
+                savedExams
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `unitool_yedek_${getTodayDateString()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function importAllDataJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const data = JSON.parse(reader.result);
+                    if (Array.isArray(data.courses)) courses = data.courses;
+                    if (Array.isArray(data.scheduleItems)) scheduleItems = data.scheduleItems;
+                    if (data.attendanceLogs) attendanceLogs = data.attendanceLogs;
+                    if (Array.isArray(data.gpaCourses)) gpaCourses = data.gpaCourses;
+                    if (data.gpaSettings) gpaSettings = data.gpaSettings;
+                    if (Array.isArray(data.savedExams)) savedExams = data.savedExams;
+
+                    localStorage.setItem('unitool_courses', JSON.stringify(courses));
+                    localStorage.setItem('unitool_schedule', JSON.stringify(scheduleItems));
+                    localStorage.setItem('unitool_att_logs', JSON.stringify(attendanceLogs));
+                    localStorage.setItem('unitool_gpa_courses', JSON.stringify(gpaCourses));
+                    localStorage.setItem('unitool_gpa_settings', JSON.stringify(gpaSettings));
+                    localStorage.setItem('unitool_saved_exams', JSON.stringify(savedExams));
+
+                    switchTab(activeTab);
+                    alert('Yedek başarıyla geri yüklendi!');
+                } catch (err) {
+                    alert('Geçersiz yedek dosyası.');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        // --- GÜNLÜK AKILLI YOKLAMA SİSTEMİ ---
+        function getTodayDateString() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function renderDailyCheckinBanner() {
+            const banner = document.getElementById('dailyCheckinBanner');
+            const listEl = document.getElementById('dailyCheckinList');
+            const dayLabel = document.getElementById('dailyCheckinDayName');
+            if (!banner || !listEl) return;
+
+            const todayDayNum = new Date().getDay();
+            const todayStr = getTodayDateString();
+            const todaysClasses = scheduleItems
+                .filter(item => Number(item.day) === todayDayNum)
+                .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+
+            const unanswered = todaysClasses.filter(item => !attendanceLogs[`${todayStr}_${item.id}`]);
+
+            if (unanswered.length === 0) {
+                banner.classList.add('hidden');
+                return;
+            }
+
+            banner.classList.remove('hidden');
+            dayLabel.innerText = `${DAY_NAMES[todayDayNum].full}`;
+            listEl.innerHTML = '';
+
+            unanswered.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'bg-slate-950 border border-slate-800 rounded-xl p-3 flex justify-between items-center gap-2';
+                row.innerHTML = `
+                    <div>
+                        <span class="font-bold text-xs text-white block">${item.name}</span>
+                        <span class="text-[11px] text-slate-400">${item.startTime} - ${item.endTime} (${item.hours} Saat)</span>
+                    </div>
+                    <div class="flex gap-1.5 shrink-0">
+                        <button type="button" onclick="answerDailyCheckin('${item.id}', 'present')"
+                            class="bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold px-2.5 py-1.5 rounded-lg active:scale-95 transition">
+                            ✅ Gittim
+                        </button>
+                        <button type="button" onclick="answerDailyCheckin('${item.id}', 'absent')"
+                            class="bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold px-2.5 py-1.5 rounded-lg active:scale-95 transition">
+                            ❌ Gitmedim (+${item.hours}s)
+                        </button>
+                    </div>
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        function answerDailyCheckin(schedId, status) {
+            const item = scheduleItems.find(x => String(x.id) === String(schedId));
+            if (!item) return;
+
+            const todayStr = getTodayDateString();
+            attendanceLogs[`${todayStr}_${item.id}`] = status;
+            localStorage.setItem('unitool_att_logs', JSON.stringify(attendanceLogs));
+
+            if (status === 'absent') {
+                syncScheduleToAttendance(false);
+                const targetCourse = courses.find(c => c.name.trim().toLowerCase() === item.name.trim().toLowerCase());
+                if (targetCourse) {
+                    targetCourse.currentAbsence += Number(item.hours) || 1;
+                    saveCourses();
+                }
+            }
+
+            renderDailyCheckinBanner();
+            if (activeTab === 'schedule') renderScheduleView();
+        }
+
+        function checkAndSendDailyNotification() {
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            const todayStr = getTodayDateString();
+            if (localStorage.getItem('unitool_last_notif_date') === todayStr) return;
+
+            const todayDayNum = new Date().getDay();
+            const unanswered = scheduleItems.filter(item => Number(item.day) === todayDayNum && !attendanceLogs[`${todayStr}_${item.id}`]);
+
+            if (unanswered.length > 0) {
+                try {
+                    new Notification('UniTool Yoklama Kontrolü 🔔', {
+                        body: `Bugünkü (${unanswered.map(u => u.name).join(', ')}) derslerine katıldın mı?`,
+                        icon: './icon.svg'
+                    });
+                    localStorage.setItem('unitool_last_notif_date', todayStr);
+                } catch (e) {}
+            }
+        }
+
+        function requestNotifPermission() {
+            if (!('Notification' in window)) {
+                alert('iPhone/iOS üzerinde en garantili bildirim için hemen yandaki "📲 iPhone Alarmı Kur (.ics)" butonunu kullanabilirsin.');
+                return;
+            }
+            Notification.requestPermission().then(perm => {
+                updateNotifStatusBadge();
+                if (perm === 'granted') checkAndSendDailyNotification();
+            });
+        }
+
+        function updateNotifStatusBadge() {
+            const badge = document.getElementById('notifStatusBadge');
+            if (!badge) return;
+            if (!('Notification' in window)) {
+                badge.innerText = 'iOS (.ics Önerilir)';
+                return;
+            }
+            if (Notification.permission === 'granted') {
+                badge.innerText = 'İzin Verildi ✓';
+                badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400';
+            } else {
+                badge.innerText = 'İzin Yok';
+            }
+        }
+
+        function exportScheduleToICS() {
+            if (scheduleItems.length === 0) {
+                alert('Önce haftalık programa ders eklemelisin.');
+                return;
+            }
+
+            const ICS_DAYS = { 0: 'SU', 1: 'MO', 2: 'TU', 3: 'WE', 4: 'TH', 5: 'FR', 6: 'SA' };
+            const now = new Date();
+            let icsLines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//UniTool//Academic Assistant//TR', 'CALSCALE:GREGORIAN'];
+
+            scheduleItems.forEach(item => {
+                const targetDay = Number(item.day);
+                const diff = (targetDay - now.getDay() + 7) % 7;
+                const firstDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff);
+                const [endH, endM] = (item.endTime || '12:00').split(':').map(Number);
+                const dtStart = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate(), endH || 12, endM || 0, 0);
+                const dtEnd = new Date(dtStart.getTime() + 15 * 60000);
+
+                const fmt = (d) => {
+                    const pad = (n) => String(n).padStart(2, '0');
+                    return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+                };
+
+                icsLines.push(
+                    'BEGIN:VEVENT',
+                    `UID:unitool-${item.id}@unitool.app`,
+                    `DTSTAMP:${fmt(now)}`,
+                    `DTSTART:${fmt(dtStart)}`,
+                    `DTEND:${fmt(dtEnd)}`,
+                    `RRULE:FREQ=WEEKLY;BYDAY=${ICS_DAYS[targetDay]};COUNT=15`,
+                    `SUMMARY:🔔 Yoklama: ${item.name} dersine gittin mi?`,
+                    `DESCRIPTION:${item.name} (${item.hours} saat) dersine gitmediysen UniTool'u açıp devamsızlığına işle: ${window.location.origin}`,
+                    'BEGIN:VALARM',
+                    'TRIGGER:-PT0M',
+                    'ACTION:DISPLAY',
+                    `DESCRIPTION:${item.name} dersine katıldın mı?`,
+                    'END:VALARM',
+                    'END:VEVENT'
+                );
+            });
+
+            icsLines.push('END:VCALENDAR');
+            const blob = new Blob([icsLines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'unitool_yoklama_alarmlari.ics';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // ============================================================================
+        // 3 KATMANLI HİBRİT FOTOĞRAF ÇÖZÜMLEME MİMARİSİ
+        // 1. Katman: Netlify Gizli Sunucu Fonksiyonu (/.netlify/functions/parse-schedule)
+        // 2. Katman: İstemci Çoklu Anahtar Havuzu (CLIENT_KEY_POOL - Key Rotation)
+        // 3. Katman: Yerel Koordinatlı Tablo OCR (Tesseract.js - Sıfır API Yedeği)
+        // ============================================================================
+
+        // 10 MB'lık fotoğrafları ~250KB JPEG'e sıkıştırır (Sunucu 6MB sınırını aşmamak ve hızı 5x artırmak için)
+        function compressImageForAI(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    const MAX_DIM = 1600;
+                    let w = img.width, h = img.height;
+                    if (w > MAX_DIM || h > MAX_DIM) {
+                        if (w > h) { h = Math.round(h * (MAX_DIM / w)); w = MAX_DIM; }
+                        else { w = Math.round(w * (MAX_DIM / h)); h = MAX_DIM; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    URL.revokeObjectURL(url);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                    resolve({
+                        base64: dataUrl.split(',')[1],
+                        mimeType: 'image/jpeg'
+                    });
+                };
+                img.onerror = reject;
+                img.src = url;
+            });
+        }
+
+        function normalizeParsedSchedule(rawArray) {
+            if (!Array.isArray(rawArray)) return [];
+            return rawArray.map(item => ({
+                id: Date.now() + Math.random(),
+                name: String(item.name || 'Ders').trim(),
+                day: Number(item.day >= 0 && item.day <= 6 ? item.day : 1),
+                startTime: String(item.startTime || '09:00'),
+                endTime: String(item.endTime || '11:00'),
+                hours: Math.max(1, parseInt(item.hours) || 2)
+            }));
+        }
+
+        // KATMAN 1: Netlify Gizli Sunucu Fonksiyonu Çağrısı
+        async function tryServerlessFunction(compressed) {
+            try {
+                const res = await fetch('/.netlify/functions/parse-schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageBase64: compressed.base64,
+                        mimeType: compressed.mimeType
+                    })
+                });
+                if (!res.ok) return null;
+                const data = await res.json();
+                if (data && Array.isArray(data.items) && data.items.length > 0) {
+                    return normalizeParsedSchedule(data.items);
+                }
+                return null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // KATMAN 2: İstemci Çoklu Anahtar Havuzu (Key Rotation & Failover)
+        async function tryClientKeyPool(compressed) {
+            if (!Array.isArray(CLIENT_KEY_POOL) || CLIENT_KEY_POOL.length === 0) return null;
+            const shuffled = [...CLIENT_KEY_POOL].map(k => k.trim()).filter(Boolean).sort(() => Math.random() - 0.5);
+            if (shuffled.length === 0) return null;
+
+            const promptText = `Bu üniversite ders programı görselindeki tüm dersleri JSON dizisi olarak çıkar: [{"name":"Ders Adı","day":1,"startTime":"09:00","endTime":"11:00","hours":2}]. Pazartesi=1..Cuma=5.`;
+
+            for (let i = 0; i < shuffled.length; i++) {
+                try {
+                    const response = await fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${shuffled[i]}`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{
+                                    parts: [
+                                        { text: promptText },
+                                        { inline_data: { mime_type: compressed.mimeType, data: compressed.base64 } }
+                                    ]
+                                }],
+                                generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
+                            })
+                        }
+                    );
+                    if (!response.ok) continue; // 429 vs. gelirse sıradaki anahtara geç
+                    const result = await response.json();
+                    const parsed = JSON.parse(result?.candidates?.[0]?.content?.parts?.[0]?.text || '[]');
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return normalizeParsedSchedule(parsed);
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+            return null;
+        }
+
+        // KATMAN 3: Yerel Koordinatlı Tablo OCR Motoru (Tesseract.js)
+        let tesseractLoaded = false;
+        function loadTesseractScript() {
+            if (tesseractLoaded || window.Tesseract) return Promise.resolve();
+            return new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+                s.onload = () => { tesseractLoaded = true; resolve(); };
+                s.onerror = () => reject(new Error('OCR kütüphanesi yüklenemedi. İnternet bağlantını kontrol et.'));
+                document.head.appendChild(s);
+            });
+        }
+
+        function preprocessImageForOCR(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    const scale = img.width < 1200 ? 1.8 : 1.2;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.min(2400, Math.round(img.width * scale));
+                    canvas.height = Math.round(img.height * (canvas.width / img.width));
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const d = imgData.data;
+                    for (let i = 0; i < d.length; i += 4) {
+                        const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+                        const contrasted = gray < 155 ? Math.max(0, gray * 0.6) : 255;
+                        d[i] = d[i + 1] = d[i + 2] = contrasted;
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+                    URL.revokeObjectURL(url);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = reject;
+                img.src = url;
+            });
+        }
+
+        async function handleSchedulePhotoUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const statusBox = document.getElementById('aiParseStatus');
+            const previewContainer = document.getElementById('aiPreviewContainer');
+            statusBox.classList.remove('hidden');
+            previewContainer.classList.add('hidden');
+
+            try {
+                statusBox.innerHTML = `⏳ Görsel optimize ediliyor ve akıllı tarayıcıya gönderiliyor...`;
+                const compressed = await compressImageForAI(file);
+
+                // ADIM 1: Gizli Netlify Sunucu Fonksiyonunu Dene
+                let extracted = await tryServerlessFunction(compressed);
+
+                // ADIM 2: Sunucu fonksiyonu yoksa İstemci Anahtar Havuzunu (Key Rotation) Dene
+                if (!extracted) {
+                    extracted = await tryClientKeyPool(compressed);
+                }
+
+                // ADIM 3: Anahtarlar tanımsızsa veya kotalar doluysa Yerel Tablo OCR Motoruna Düş
+                if (!extracted) {
+                    statusBox.innerHTML = `🔍 Yerel Türkçe Tablo Okuyucu (OCR) devreye alındı, sütunlar taranıyor...`;
+                    const processedDataUrl = await preprocessImageForOCR(file);
+                    await loadTesseractScript();
+                    const worker = await Tesseract.createWorker('tur');
+                    const ret = await worker.recognize(processedDataUrl);
+                    await worker.terminate();
+                    extracted = parseScheduleFromOCRData(ret.data);
+                }
+
+                if (!extracted || extracted.length === 0) {
+                    pendingAiItems = [
+                        { id: Date.now() + 1, name: 'Örnek Ders 1', day: 1, startTime: '09:00', endTime: '11:00', hours: 2 }
+                    ];
+                    statusBox.innerHTML = `<span class="text-amber-400 font-bold">⚠️ Uyarı:</span> Görsel çok düşük çözünürlüklü olduğu için net ayrıştırılamadı. Aşağıdan satır ekleyerek hızlıca tamamlayabilirsin.`;
+                } else {
+                    pendingAiItems = extracted;
+                    statusBox.classList.add('hidden');
+                }
+
+                renderAiPreviewList();
+
+            } catch (err) {
+                statusBox.innerHTML = `<span class="text-rose-400 font-bold">Hata:</span> ${err.message}`;
+            } finally {
+                e.target.value = '';
+            }
+        }
+
+        function parseScheduleFromOCRData(ocrData) {
+            const words = ocrData.words || [];
+            const lines = ocrData.lines || [];
+
+            const dayMatchers = [
+                { day: 1, regex: /(pazartes|pzt|monday|\bmon\b)/i },
+                { day: 2, regex: /(\bsal[ıi]\b|\bsal\b|tuesday|\btue\b)/i },
+                { day: 3, regex: /(çarşamba|carsamba|\bçar\b|\bcar\b|wednesday)/i },
+                { day: 4, regex: /(perşembe|persembe|\bper\b|thursday)/i },
+                { day: 5, regex: /(\bcuma\b|\bcum\b|friday)/i },
+                { day: 6, regex: /(cumartes|\bcmt\b|saturday)/i }
+            ];
+
+            let dayAnchors = [];
+            words.forEach(w => {
+                const txt = (w.text || '').trim();
+                if (txt.length < 3) return;
+                dayMatchers.forEach(dm => {
+                    if (dm.regex.test(txt) && !dayAnchors.some(a => a.day === dm.day)) {
+                        dayAnchors.push({
+                            day: dm.day,
+                            xCenter: (w.bbox.x0 + w.bbox.x1) / 2,
+                            yCenter: (w.bbox.y0 + w.bbox.y1) / 2,
+                            x0: w.bbox.x0, x1: w.bbox.x1, y0: w.bbox.y0, y1: w.bbox.y1
+                        });
+                    }
+                });
+            });
+
+            let isColumnLayout = false;
+            if (dayAnchors.length >= 2) {
+                const xSpread = Math.max(...dayAnchors.map(a => a.xCenter)) - Math.min(...dayAnchors.map(a => a.xCenter));
+                const ySpread = Math.max(...dayAnchors.map(a => a.yCenter)) - Math.min(...dayAnchors.map(a => a.yCenter));
+                isColumnLayout = xSpread > ySpread;
+            }
+
+            const noiseRegex = /^(pazartes|sal[ıi]|çarşamba|carsamba|perşembe|persembe|cuma|cumartes|pazar|saat|ders|kod|şube|sube|derslik|amfi|lab|online|uzaktan|prof|doç|doc|dr|öğr|ogr|gör|gor|arş|ars|üyesi|uyesi|bölüm|bolum|fakülte|zorunlu|seçmeli)$/i;
+            const timeRegex = /(\d{1,2}[:.]\d{2})\s*[-–]?\s*(\d{1,2}[:.]\d{2})?/;
+
+            let rawCandidates = [];
+
+            if (isColumnLayout && dayAnchors.length >= 2) {
+                dayAnchors.sort((a, b) => a.xCenter - b.xCenter);
+                const headerY = Math.max(...dayAnchors.map(a => a.y1));
+
+                const colBounds = dayAnchors.map((a, idx) => {
+                    const left = idx === 0 ? Math.max(0, a.x0 - 80) : (dayAnchors[idx - 1].xCenter + a.xCenter) / 2;
+                    const right = idx === dayAnchors.length - 1 ? a.x1 + 250 : (a.xCenter + dayAnchors[idx + 1].xCenter) / 2;
+                    return { day: a.day, left, right };
+                });
+
+                colBounds.forEach(col => {
+                    const colWords = words.filter(w => {
+                        const xc = (w.bbox.x0 + w.bbox.x1) / 2;
+                        return w.bbox.y0 > headerY + 5 && xc >= col.left && xc < col.right;
+                    }).sort((a, b) => a.bbox.y0 - b.bbox.y0);
+
+                    let clusters = [];
+                    colWords.forEach(w => {
+                        const clean = (w.text || '').replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ\s:.-]/g, '').trim();
+                        if (clean.length < 2 || noiseRegex.test(clean)) return;
+
+                        const lastCluster = clusters[clusters.length - 1];
+                        if (lastCluster && (w.bbox.y0 - lastCluster.yEnd) < 42) {
+                            lastCluster.words.push(clean);
+                            lastCluster.yEnd = Math.max(lastCluster.yEnd, w.bbox.y1);
+                        } else {
+                            clusters.push({ day: col.day, yStart: w.bbox.y0, yEnd: w.bbox.y1, words: [clean] });
+                        }
+                    });
+
+                    clusters.forEach(cl => {
+                        const cleanedName = cleanCourseTitle(cl.words.join(' '));
+                        if (cleanedName.length >= 4) {
+                            rawCandidates.push({ name: cleanedName, day: col.day, startTime: '09:00', endTime: '11:00', hours: 2 });
+                        }
+                    });
+                });
+            } else {
+                let currentDay = 1;
+                lines.forEach(line => {
+                    const txt = (line.text || '').trim();
+                    if (!txt) return;
+                    dayMatchers.forEach(dm => { if (dm.regex.test(txt)) currentDay = dm.day; });
+                    const timeMatch = txt.match(timeRegex);
+                    const cleaned = cleanCourseTitle(txt);
+                    if (cleaned.length >= 4 && !noiseRegex.test(cleaned)) {
+                        const startT = timeMatch && timeMatch[1] ? timeMatch[1].replace('.', ':').padStart(5, '0') : '09:00';
+                        const endT = timeMatch && timeMatch[2] ? timeMatch[2].replace('.', ':').padStart(5, '0') : '11:00';
+                        rawCandidates.push({ name: cleaned, day: currentDay, startTime: startT, endTime: endT, hours: calcHoursBetween(startT, endT) });
+                    }
+                });
+            }
+
+            let merged = [];
+            rawCandidates.forEach(cand => {
+                const existing = merged.find(m => m.day === cand.day && similarityScore(m.name, cand.name) > 0.72);
+                if (existing) {
+                    existing.hours = Math.min(6, existing.hours + 1);
+                } else {
+                    merged.push({
+                        id: Date.now() + Math.random(),
+                        name: cand.name,
+                        day: cand.day,
+                        startTime: cand.startTime,
+                        endTime: cand.endTime,
+                        hours: cand.hours || 2
+                    });
+                }
+            });
+
+            return merged.slice(0, 18);
+        }
+
+        function cleanCourseTitle(raw) {
+            return raw
+                .replace(/\b\d{1,2}[:.]\d{2}(\s*[-–]\s*\d{1,2}[:.]\d{2})?\b/g, '')
+                .replace(/\b[A-ZÇĞİÖŞÜ]{2,5}\s*[-]?\s*\d{3,4}[A-Z]?\b/gi, '')
+                .replace(/\b(Prof|Doç|Dr|Öğr|Gör|Arş|Üyesi|Derslik|Amfi|Lab|Sınıf|Kat|Blok|Şube)\b\.?/gi, '')
+                .replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ\s-]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function calcHoursBetween(s, e) {
+            const [sh] = (s || '09:00').split(':').map(Number);
+            const [eh] = (e || '11:00').split(':').map(Number);
+            const diff = (eh || 11) - (sh || 9);
+            return diff >= 1 && diff <= 6 ? diff : 2;
+        }
+
+        function similarityScore(a, b) {
+            const s1 = a.toLowerCase(), s2 = b.toLowerCase();
+            if (s1 === s2 || s1.includes(s2) || s2.includes(s1)) return 1;
+            const w1 = s1.split(' '), w2 = s2.split(' ');
+            const common = w1.filter(w => w2.includes(w));
+            return common.length / Math.max(w1.length, w2.length);
+        }
+
+        function addEmptyPreviewRow() {
+            pendingAiItems.push({
+                id: Date.now() + Math.random(),
+                name: 'Yeni Ders',
+                day: selectedDay || 1,
+                startTime: '09:00',
+                endTime: '11:00',
+                hours: 2
+            });
+            renderAiPreviewList();
+        }
+
+        function renderAiPreviewList() {
+            const container = document.getElementById('aiPreviewContainer');
+            const listEl = document.getElementById('aiPreviewList');
+            container.classList.remove('hidden');
+            listEl.innerHTML = '';
+
+            pendingAiItems.forEach((item, idx) => {
+                const dayOptions = DAY_ORDER.map(d =>
+                    `<option value="${d}" ${Number(item.day) === d ? 'selected' : ''}>${DAY_NAMES[d].short}</option>`
+                ).join('');
+
+                const row = document.createElement('div');
+                row.className = 'bg-slate-950 border border-slate-800 rounded-lg p-2 flex items-center justify-between gap-1.5 text-xs';
+                row.innerHTML = `
+                    <input type="text" value="${item.name}" oninput="pendingAiItems[${idx}].name = this.value"
+                        placeholder="Ders Adı"
+                        class="flex-1 bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-white text-xs" style="min-width:0;">
+                    <select onchange="pendingAiItems[${idx}].day = parseInt(this.value)"
+                        class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1.5 text-indigo-300 font-semibold text-xs">
+                        ${dayOptions}
+                    </select>
+                    <input type="number" min="1" max="10" value="${item.hours}" oninput="pendingAiItems[${idx}].hours = parseInt(this.value)||1"
+                        title="Kaç Saat"
+                        class="w-10 bg-slate-900 border border-slate-800 rounded px-1 py-1.5 text-center text-emerald-400 font-bold text-xs">
+                    <button type="button" onclick="pendingAiItems.splice(${idx},1); renderAiPreviewList();" class="text-rose-400 px-1 font-bold text-base">&times;</button>
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        function confirmAiScheduleImport() {
+            const validItems = pendingAiItems.filter(x => x.name && x.name.trim().length > 0);
+            if (validItems.length === 0) return;
+
+            scheduleItems = [...scheduleItems, ...validItems];
+            localStorage.setItem('unitool_schedule', JSON.stringify(scheduleItems));
+            pendingAiItems = [];
+            document.getElementById('aiPreviewContainer').classList.add('hidden');
+            document.getElementById('aiParseStatus').classList.add('hidden');
+
+            syncScheduleToAttendance(true);
+            renderScheduleView();
+            renderDailyCheckinBanner();
+        }
+
+        // --- PROGRAM YÖNETİMİ ---
+        function toggleScheduleModal() {
+            const modal = document.getElementById('scheduleModal');
+            if (!modal) return;
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('schedDay').value = selectedDay;
+                document.getElementById('schedCourseName').focus();
+            }
+        }
+
+        function addScheduleItemManual(e) {
+            e.preventDefault();
+            const name = document.getElementById('schedCourseName').value.trim();
+            const day = parseInt(document.getElementById('schedDay').value);
+            const hours = parseInt(document.getElementById('schedHours').value) || 2;
+            const startTime = document.getElementById('schedStart').value || '09:00';
+            const endTime = document.getElementById('schedEnd').value || '11:00';
+
+            scheduleItems.push({ id: Date.now() + Math.random(), name, day, hours, startTime, endTime });
+            localStorage.setItem('unitool_schedule', JSON.stringify(scheduleItems));
+            selectedDay = day;
+            document.getElementById('scheduleForm').reset();
+            toggleScheduleModal();
+            syncScheduleToAttendance(false);
+            renderScheduleView();
+            renderDailyCheckinBanner();
+        }
+
+        function removeScheduleItem(id) {
+            scheduleItems = scheduleItems.filter(x => String(x.id) !== String(id));
+            localStorage.setItem('unitool_schedule', JSON.stringify(scheduleItems));
+            renderScheduleView();
+            renderDailyCheckinBanner();
+        }
+
+        function syncScheduleToAttendance(showAlert = false) {
+            if (scheduleItems.length === 0) {
+                if (showAlert) alert('Programda eşitlenecek ders bulunamadı.');
+                return;
+            }
+
+            const weeklyMap = {};
+            scheduleItems.forEach(item => {
+                const key = item.name.trim().toLowerCase();
+                if (!weeklyMap[key]) weeklyMap[key] = { displayName: item.name.trim(), totalWeeklyHours: 0 };
+                weeklyMap[key].totalWeeklyHours += Number(item.hours) || 1;
+            });
+
+            let createdCount = 0, updatedCount = 0;
+            Object.keys(weeklyMap).forEach(key => {
+                const info = weeklyMap[key];
+                const existing = courses.find(c => c.name.trim().toLowerCase() === key);
+                if (existing) {
+                    if (existing.weeklyHours !== info.totalWeeklyHours) {
+                        existing.weeklyHours = info.totalWeeklyHours;
+                        updatedCount++;
+                    }
+                } else {
+                    courses.push({
+                        id: Date.now() + Math.random(),
+                        name: info.displayName,
+                        weeklyHours: info.totalWeeklyHours,
+                        totalWeeks: 14,
+                        reqAttendance: 70,
+                        currentAbsence: 0
+                    });
+                    createdCount++;
+                }
+            });
+
+            saveCourses();
+            if (showAlert) {
+                alert(`Senkronizasyon tamamlandı!\n• ${createdCount} yeni ders devamsızlık takibine eklendi.\n• ${updatedCount} dersin haftalık saati güncellendi.`);
+            }
+        }
+
+        function renderScheduleView() {
+            updateNotifStatusBadge();
+            const bar = document.getElementById('daySelectorBar');
+            bar.innerHTML = '';
+            DAY_ORDER.forEach(d => {
+                const count = scheduleItems.filter(x => Number(x.day) === d).length;
+                const isSelected = Number(selectedDay) === d;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => { selectedDay = d; renderScheduleView(); };
+                btn.className = `py-2 rounded-lg text-center transition ${isSelected ? 'bg-indigo-600 text-white font-bold shadow' : 'text-slate-400'}`;
+                btn.style.background = isSelected ? '#4f46e5' : 'transparent';
+                btn.innerHTML = `
+                    <span class="text-xs block">${DAY_NAMES[d].short}</span>
+                    <span class="text-[10px] ${isSelected ? 'text-indigo-200' : 'text-slate-500'}">${count > 0 ? `${count} ders` : '-'}</span>
+                `;
+                bar.appendChild(btn);
+            });
+
+            const listEl = document.getElementById('scheduleDayList');
+            listEl.innerHTML = '';
+            const dayCourses = scheduleItems
+                .filter(x => Number(x.day) === Number(selectedDay))
+                .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+
+            if (dayCourses.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-12 px-4 border border-dashed border-slate-800 rounded-2xl">
+                        <p class="text-slate-400 text-xs mb-2">${DAY_NAMES[selectedDay].full} günü için kayıtlı ders yok.</p>
+                        <button type="button" onclick="toggleScheduleModal()" class="text-indigo-400 text-xs font-semibold underline">+ Bu Güne Ders Ekle</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const todayStr = getTodayDateString();
+            const isTodaySelected = Number(selectedDay) === new Date().getDay();
+
+            dayCourses.forEach(item => {
+                const logStatus = attendanceLogs[`${todayStr}_${item.id}`];
+                let statusPill = '';
+                if (isTodaySelected && logStatus === 'present') {
+                    statusPill = `<span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">Bugün Katıldın ✓</span>`;
+                } else if (isTodaySelected && logStatus === 'absent') {
+                    statusPill = `<span class="text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-full">Bugün Gitmedin (+${item.hours}s)</span>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'bg-slate-900 border border-slate-800 rounded-xl p-3.5 flex justify-between items-center';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-sm text-white">${item.name}</span>
+                            ${statusPill}
+                        </div>
+                        <span class="text-xs text-indigo-400 font-medium mt-0.5 block">
+                            🕒 ${item.startTime} - ${item.endTime} &bull; <strong class="text-emerald-400">${item.hours} Ders Saati</strong>
+                        </span>
+                    </div>
+                    <button type="button" onclick="removeScheduleItem('${item.id}')" class="text-slate-400 px-2 text-lg">&times;</button>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        // --- DEVAMSIZLIK MODÜLÜ ---
+        function saveCourses() {
+            localStorage.setItem('unitool_courses', JSON.stringify(courses));
+            renderCourses();
+        }
+
+        function toggleAttendanceModal() {
+            const modal = document.getElementById('courseModal');
+            if (!modal) return;
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                updatePreview();
+                document.getElementById('courseName')?.focus();
+            }
+        }
+
+        function updatePreview() {
+            const wHours = parseFloat(document.getElementById('weeklyHours')?.value) || 0;
+            const weeks = parseFloat(document.getElementById('totalWeeks')?.value) || 0;
+            const reqAtt = parseFloat(document.getElementById('reqAttendance')?.value) || 0;
+
+            const absencePercent = Math.max(0, 100 - reqAtt);
+            const totalHours = wHours * weeks;
+            const exactMax = totalHours * (absencePercent / 100);
+            const safeMax = Math.floor(exactMax);
+
+            document.getElementById('allowanceText').innerText = `Devamsızlık Hakkı: %${absencePercent}`;
+            document.getElementById('prevTotal').innerText = `${totalHours} Saat`;
+            document.getElementById('prevExact').innerText = `${exactMax.toFixed(1)} Saat`;
+            document.getElementById('prevSafe').innerText = `Maks. ${safeMax} Saat`;
+        }
+
+        function addAttendanceCourse(e) {
+            e.preventDefault();
+            const name = document.getElementById('courseName').value.trim();
+            const weeklyHours = parseInt(document.getElementById('weeklyHours').value);
+            const totalWeeks = parseInt(document.getElementById('totalWeeks').value);
+            const reqAttendance = parseFloat(document.getElementById('reqAttendance').value);
+
+            courses.push({ id: Date.now(), name, weeklyHours, totalWeeks, reqAttendance, currentAbsence: 0 });
+            document.getElementById('courseForm').reset();
+            toggleAttendanceModal();
+            saveCourses();
+        }
+
+        function updateAbsence(id, delta) {
+            const course = courses.find(c => c.id === id);
+            if (!course) return;
+            course.currentAbsence = Math.max(0, course.currentAbsence + delta);
+            saveCourses();
+        }
+
+        function deleteCourse(id) {
+            if (confirm('Bu dersi silmek istediğine emin misin?')) {
+                courses = courses.filter(c => c.id !== id);
+                saveCourses();
+            }
+        }
+
+        function renderCourses() {
+            const listEl = document.getElementById('courseList');
+            const emptyEl = document.getElementById('emptyState');
+            const summaryBar = document.getElementById('summaryBar');
+            if (!listEl) return;
+
+            listEl.innerHTML = '';
+
+            if (courses.length === 0) {
+                emptyEl?.classList.remove('hidden');
+                summaryBar?.classList.add('hidden');
+                return;
+            }
+
+            emptyEl?.classList.add('hidden');
+            summaryBar?.classList.remove('hidden');
+
+            let riskCount = 0, failedCount = 0;
+
+            courses.forEach(course => {
+                const totalHours = course.weeklyHours * course.totalWeeks;
+                const absenceAllowancePercent = 100 - course.reqAttendance;
+                const exactAllowed = totalHours * (absenceAllowancePercent / 100);
+                const safeMax = Math.floor(exactAllowed);
+                const remaining = safeMax - course.currentAbsence;
+                const currentAbsencePercent = totalHours > 0 ? ((course.currentAbsence / totalHours) * 100).toFixed(1) : 0;
+
+                let statusBadge = '', barColor = 'bg-emerald-500', borderColor = 'border-slate-800';
+
+                if (course.currentAbsence > safeMax) {
+                    failedCount++;
+                    statusBadge = `<span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full">KALDI (Sınır Aşıldı)</span>`;
+                    barColor = 'bg-rose-500'; borderColor = 'border-rose-500/40';
+                } else if (course.currentAbsence === safeMax) {
+                    riskCount++;
+                    statusBadge = `<span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full">SINIRDA (Son Hak!)</span>`;
+                    barColor = 'bg-amber-500'; borderColor = 'border-amber-500/40';
+                } else if (remaining <= course.weeklyHours) {
+                    riskCount++;
+                    statusBadge = `<span class="bg-amber-500/10 text-amber-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Riskli (${remaining}s kaldı)</span>`;
+                    barColor = 'bg-amber-500';
+                } else {
+                    statusBadge = `<span class="bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Güvende (${remaining}s hak var)</span>`;
+                }
+
+                const progressPercent = safeMax > 0 ? Math.min(100, (course.currentAbsence / safeMax) * 100) : 100;
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-900 border ${borderColor} rounded-2xl p-4 shadow-md`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="font-bold text-base text-white leading-snug">${course.name}</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">
+                                Haftalık ${course.weeklyHours}s &bull; ${course.totalWeeks} Hafta (${totalHours}s) &bull; %${course.reqAttendance} Zorunlu
+                            </p>
+                        </div>
+                        <button type="button" onclick="deleteCourse(${course.id})" class="text-slate-400 text-xs px-1.5 py-1">Sil</button>
+                    </div>
+
+                    <div class="flex justify-between items-center" style="margin:0.75rem 0;">
+                        ${statusBadge}
+                        <span class="text-xs text-slate-400">
+                            Fiili: <strong class="text-slate-200">%${currentAbsencePercent}</strong> / Maks: %${absenceAllowancePercent}
+                        </span>
+                    </div>
+
+                    <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden mb-4 border border-slate-800">
+                        <div class="${barColor} h-full transition-all" style="width: ${progressPercent}%; height:100%;"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-slate-950 border border-slate-800/80 rounded-xl p-2">
+                        <div class="pl-2">
+                            <span class="text-[11px] text-slate-400 block">Yapılan / Güvenli Sınır</span>
+                            <span class="text-lg font-black text-white">${course.currentAbsence} <span class="text-slate-400 font-normal text-sm">/ ${safeMax} saat</span></span>
+                            ${exactAllowed % 1 !== 0 ? `<span class="text-[10px] text-slate-500 block">(Matematiksel: ${exactAllowed.toFixed(1)}s)</span>` : ''}
+                        </div>
+
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="updateAbsence(${course.id}, -1)" 
+                                class="w-10 h-10 rounded-lg bg-slate-800 text-white font-bold text-lg flex items-center justify-center active:scale-90 transition" style="background:#1e293b;">&minus;</button>
+                            <button type="button" onclick="updateAbsence(${course.id}, 1)" 
+                                class="w-10 h-10 rounded-lg bg-indigo-600 text-white font-bold text-lg flex items-center justify-center active:scale-90 transition" style="background:#4f46e5;">+</button>
+                            <button type="button" onclick="updateAbsence(${course.id}, ${course.weeklyHours})" 
+                                class="h-10 px-2.5 rounded-lg bg-slate-800 text-indigo-300 font-semibold text-xs flex items-center justify-center active:scale-90 transition" style="background:#1e293b;">+${course.weeklyHours}s</button>
+                        </div>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+
+            document.getElementById('statTotal').innerText = courses.length;
+            document.getElementById('statRisk').innerText = riskCount;
+            document.getElementById('statFailed').innerText = failedCount;
+        }
+
+        // --- GPA MODÜLÜ ---
+        function initGpaInputs() {
+            document.getElementById('scaleSelect').value = gpaSettings.scale || 'standard';
+            document.getElementById('prevCredits').value = gpaSettings.prevCredits || 0;
+            document.getElementById('prevGpa').value = gpaSettings.prevGpa || 0;
+            document.getElementById('targetGpa').value = gpaSettings.targetGpa !== undefined ? gpaSettings.targetGpa : 3.00;
+        }
+
+        function saveGpaSettings() {
+            gpaSettings.scale = document.getElementById('scaleSelect')?.value || 'standard';
+            gpaSettings.prevCredits = parseFloat(document.getElementById('prevCredits')?.value) || 0;
+            gpaSettings.prevGpa = Math.min(4, Math.max(0, parseFloat(document.getElementById('prevGpa')?.value) || 0));
+            gpaSettings.targetGpa = Math.min(4, Math.max(0, parseFloat(document.getElementById('targetGpa')?.value) || 0));
+            localStorage.setItem('unitool_gpa_settings', JSON.stringify(gpaSettings));
+            renderGpaView();
+        }
+
+        function saveGpaCourses() {
+            localStorage.setItem('unitool_gpa_courses', JSON.stringify(gpaCourses));
+            calculateGpaAndTarget();
+        }
+
+        function addGpaCourseRow(name = '', credits = 5, grade = 'TARGET') {
+            gpaCourses.push({ id: Date.now() + Math.random(), name: name || `Ders ${gpaCourses.length + 1}`, credits, grade });
+            localStorage.setItem('unitool_gpa_courses', JSON.stringify(gpaCourses));
+            renderGpaView();
+        }
+
+        function importCoursesToGPA() {
+            if (courses.length === 0) {
+                alert('Devamsızlık listesinde aktarılacak ders bulunamadı.');
+                return;
+            }
+            let added = 0;
+            courses.forEach(c => {
+                if (!gpaCourses.some(g => g.name.toLowerCase() === c.name.toLowerCase())) {
+                    gpaCourses.push({ id: Date.now() + Math.random(), name: c.name, credits: c.weeklyHours + 2, grade: 'TARGET' });
+                    added++;
+                }
+            });
+            localStorage.setItem('unitool_gpa_courses', JSON.stringify(gpaCourses));
+            switchTab('gpa');
+            if (added === 0) alert('Tüm dersler zaten GPA listesinde mevcut.');
+        }
+
+        function updateGpaCourse(id, field, value) {
+            const c = gpaCourses.find(item => item.id === id);
+            if (!c) return;
+            if (field === 'name') c.name = value;
+            if (field === 'credits') c.credits = Math.max(1, parseFloat(value) || 1);
+            if (field === 'grade') c.grade = value;
+            saveGpaCourses();
+        }
+
+        function removeGpaCourse(id) {
+            gpaCourses = gpaCourses.filter(item => item.id !== id);
+            localStorage.setItem('unitool_gpa_courses', JSON.stringify(gpaCourses));
+            renderGpaView();
+        }
+
+        function renderGpaView() {
+            initGpaInputs();
+            const listEl = document.getElementById('gpaCourseList');
+            const emptyEl = document.getElementById('gpaEmptyState');
+            const activeScale = GRADE_SCALES[gpaSettings.scale] || GRADE_SCALES.standard;
+            if (!listEl) return;
+
+            listEl.innerHTML = '';
+
+            if (gpaCourses.length === 0) {
+                emptyEl?.classList.remove('hidden');
+                document.getElementById('targetAdvisorBox')?.classList.add('hidden');
+                calculateGpaAndTarget();
+                return;
+            }
+
+            emptyEl?.classList.add('hidden');
+
+            gpaCourses.forEach(course => {
+                const validValues = activeScale.map(s => String(s.value));
+                if (course.grade !== 'TARGET' && !validValues.includes(String(course.grade))) course.grade = 'TARGET';
+
+                const optionsHtml = [
+                    `<option value="TARGET" ${course.grade === 'TARGET' ? 'selected' : ''}>🎯 ? (Hedef Hesapla)</option>`,
+                    ...activeScale.map(g => `<option value="${g.value}" ${String(course.grade) === String(g.value) ? 'selected' : ''}>${g.label} (${g.value.toFixed(2)})</option>`)
+                ].join('');
+
+                const isTarget = course.grade === 'TARGET';
+                const row = document.createElement('div');
+                row.className = `bg-slate-900 border ${isTarget ? 'border-indigo-500/40' : 'border-slate-800'} rounded-xl p-3 flex items-center gap-2`;
+                row.innerHTML = `
+                    <input type="text" value="${course.name}" 
+                        oninput="updateGpaCourse(${course.id}, 'name', this.value)"
+                        placeholder="Ders Adı"
+                        class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-white font-medium" style="min-width:0;">
+                    <div class="w-16">
+                        <input type="number" min="1" max="30" value="${course.credits}" 
+                            oninput="updateGpaCourse(${course.id}, 'credits', this.value)"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-xs text-center text-emerald-400 font-bold">
+                    </div>
+                    <select onchange="updateGpaCourse(${course.id}, 'grade', this.value)"
+                        class="w-36 bg-slate-950 border ${isTarget ? 'border-indigo-500/60 text-indigo-300' : 'border-slate-800 text-white'} rounded-lg px-2 py-2 text-xs font-semibold">
+                        ${optionsHtml}
+                    </select>
+                    <button type="button" onclick="removeGpaCourse(${course.id})" class="text-slate-400 px-1 text-base leading-none">&times;</button>
+                `;
+                listEl.appendChild(row);
+            });
+
+            calculateGpaAndTarget();
+        }
+
+        function calculateGpaAndTarget() {
+            const activeScale = GRADE_SCALES[gpaSettings.scale] || GRADE_SCALES.standard;
+            const prevCredits = gpaSettings.prevCredits || 0;
+            const prevGpa = gpaSettings.prevGpa || 0;
+            const targetGpa = gpaSettings.targetGpa || 0;
+            const prevPoints = prevCredits * prevGpa;
+
+            let fixedCredits = 0, fixedPoints = 0, openCredits = 0, openCourses = [];
+
+            gpaCourses.forEach(c => {
+                const cr = parseFloat(c.credits) || 0;
+                if (c.grade === 'TARGET') {
+                    openCredits += cr; openCourses.push({ ...c, credits: cr });
+                } else {
+                    const gr = parseFloat(c.grade) || 0;
+                    fixedCredits += cr; fixedPoints += cr * gr;
+                }
+            });
+
+            const totalSemCredits = fixedCredits + openCredits;
+            const semGpa = fixedCredits > 0 ? (fixedPoints / fixedCredits) : 0;
+            const currentCumCredits = prevCredits + fixedCredits;
+            const currentCumGpa = currentCumCredits > 0 ? ((prevPoints + fixedPoints) / currentCumCredits) : 0;
+
+            document.getElementById('gpaSemesterVal').innerText = semGpa.toFixed(2);
+            document.getElementById('gpaCumulativeVal').innerText = currentCumGpa.toFixed(2);
+            document.getElementById('gpaTotalCredits').innerText = totalSemCredits;
+
+            const advisorBox = document.getElementById('targetAdvisorBox');
+            const badge = document.getElementById('targetStatusBadge');
+            const textEl = document.getElementById('targetAdvisorText');
+            const recEl = document.getElementById('targetRecommendations');
+
+            if (gpaCourses.length === 0) {
+                advisorBox.classList.add('hidden');
+                return;
+            }
+
+            advisorBox.classList.remove('hidden');
+            recEl.innerHTML = '';
+
+            const totalAllCredits = prevCredits + totalSemCredits;
+            const totalRequiredPoints = totalAllCredits * targetGpa;
+            const pointsNeededFromOpen = totalRequiredPoints - (prevPoints + fixedPoints);
+
+            if (openCourses.length > 0) {
+                const reqAvgOpen = pointsNeededFromOpen / openCredits;
+                const maxPossibleGpa = (prevPoints + fixedPoints + (openCredits * 4.0)) / totalAllCredits;
+
+                if (reqAvgOpen > 4.0001) {
+                    badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30';
+                    badge.innerText = 'Matematiksel Olarak İmkansız';
+                    textEl.innerHTML = `Belirsiz bıraktığın <strong>${openCredits} AKTS</strong>'lik derslerin tamamından <strong>${activeScale[0].label} (4.00)</strong> alsan bile ulaşabileceğin maksimum GANO: <strong class="text-white">${maxPossibleGpa.toFixed(2)}</strong>.`;
+                    return;
+                }
+
+                if (reqAvgOpen <= 0) {
+                    badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                    badge.innerText = 'Hedef Garantide';
+                    textEl.innerHTML = `Mevcut puanlarınla <strong>${targetGpa.toFixed(2)}</strong> hedefini zaten aşmış durumdasın.`;
+                    return;
+                }
+
+                badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-950/40 text-indigo-300 border border-indigo-500/30';
+                badge.innerText = `Gereken Ort: ${reqAvgOpen.toFixed(2)}`;
+                textEl.innerHTML = `<strong>${targetGpa.toFixed(2)} GANO</strong> hedefine ulaşmak için <strong>?</strong> olarak bıraktığın derslerden alman gereken en dengeli minimum harf notu kombinasyonu:`;
+
+                const scaleLen = activeScale.length;
+                let assignments = openCourses.map(c => ({ ...c, scaleIndex: scaleLen - 1 }));
+                const currentOpenPoints = () => assignments.reduce((sum, a) => sum + (a.credits * activeScale[a.scaleIndex].value), 0);
+
+                let guard = 0;
+                while (currentOpenPoints() < pointsNeededFromOpen - 1e-6 && guard < 500) {
+                    guard++;
+                    const upgradable = assignments.filter(a => a.scaleIndex > 0);
+                    if (upgradable.length === 0) break;
+                    upgradable.sort((a, b) => (b.scaleIndex !== a.scaleIndex) ? (b.scaleIndex - a.scaleIndex) : (b.credits - a.credits));
+                    upgradable[0].scaleIndex -= 1;
+                }
+
+                for (let i = assignments.length - 1; i >= 0; i--) {
+                    while (assignments[i].scaleIndex < scaleLen - 1) {
+                        const nextIdx = assignments[i].scaleIndex + 1;
+                        const diff = assignments[i].credits * (activeScale[assignments[i].scaleIndex].value - activeScale[nextIdx].value);
+                        if (currentOpenPoints() - diff >= pointsNeededFromOpen - 1e-6) assignments[i].scaleIndex = nextIdx;
+                        else break;
+                    }
+                }
+
+                const achievedTotalGpa = ((prevPoints + fixedPoints + currentOpenPoints()) / totalAllCredits).toFixed(2);
+
+                assignments.forEach(a => {
+                    const gradeObj = activeScale[a.scaleIndex];
+                    const item = document.createElement('div');
+                    item.className = 'flex justify-between items-center bg-slate-950 border border-slate-800/90 rounded-lg px-3 py-2 text-xs';
+                    item.innerHTML = `
+                        <span class="text-slate-200 font-medium">${a.name} <span class="text-slate-400">(${a.credits} AKTS)</span></span>
+                        <span class="font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-md">
+                            Min: ${gradeObj.label} (${gradeObj.value.toFixed(2)})
+                        </span>
+                    `;
+                    recEl.appendChild(item);
+                });
+
+                const summaryNote = document.createElement('p');
+                summaryNote.className = 'text-[11px] text-slate-400 pt-1 text-right';
+                summaryNote.innerHTML = `Bu kombinasyon ile oluşan GANO: <strong class="text-white">${achievedTotalGpa}</strong>`;
+                recEl.appendChild(summaryNote);
+            } else {
+                if (currentCumGpa >= targetGpa - 1e-6) {
+                    badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                    badge.innerText = 'Hedefe Ulaşıldı';
+                    textEl.innerHTML = `Seçtiğin harf notlarıyla genel ortalaman <strong>${currentCumGpa.toFixed(2)}</strong> oluyor ve <strong>${targetGpa.toFixed(2)}</strong> hedefini sağlıyorsun.`;
+                } else {
+                    badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                    badge.innerText = `${(targetGpa - currentCumGpa).toFixed(2)} Puan Eksik`;
+                    textEl.innerHTML = `Seçtiğin notlarla GANO <strong>${currentCumGpa.toFixed(2)}</strong> kalıyor. Bazı dersleri <strong>? (Hedef Hesapla)</strong> olarak bırakıp gereken harfleri görebilirsin.`;
+                }
+            }
+        }
+
+        // --- VİZE / FİNAL / ÇAN MODÜLÜ ---
+        function initExamView() {
+            const selectEl = document.getElementById('examCourseQuickSelect');
+            if (selectEl) {
+                const allCourseNames = [...new Set([...courses.map(c => c.name), ...gpaCourses.map(g => g.name)])];
+                selectEl.innerHTML = `<option value="">Kayıtlı Dersten Seç...</option>` +
+                    allCourseNames.map(n => `<option value="${n}">${n}</option>`).join('');
+            }
+            calculateExamRequirements();
+            renderSavedExams();
+        }
+
+        function loadCourseIntoExam(courseName) {
+            if (!courseName) return;
+            document.getElementById('examCourseName').value = courseName;
+        }
+
+        function setExamMode(mode) {
+            examMode = mode;
+            const btnAbs = document.getElementById('btnModeAbsolute');
+            const btnCrv = document.getElementById('btnModeCurve');
+            const curveBox = document.getElementById('curveParamsBox');
+
+            if (mode === 'absolute') {
+                btnAbs.style.background = '#4f46e5'; btnAbs.style.color = '#ffffff';
+                btnCrv.style.background = 'transparent'; btnCrv.style.color = '#94a3b8';
+                curveBox.classList.add('hidden');
+            } else {
+                btnCrv.style.background = '#4f46e5'; btnCrv.style.color = '#ffffff';
+                btnAbs.style.background = 'transparent'; btnAbs.style.color = '#94a3b8';
+                curveBox.classList.remove('hidden');
+            }
+            calculateExamRequirements();
+        }
+
+        function autoAdjustFinalWeight() {
+            const mW = parseFloat(document.getElementById('midtermWeight')?.value) || 0;
+            const eW = parseFloat(document.getElementById('extraWeight')?.value) || 0;
+            document.getElementById('finalWeight').value = Math.max(0, 100 - (mW + eW));
+            calculateExamRequirements();
+        }
+
+        function resetExamCalculator() {
+            document.getElementById('examCourseName').value = '';
+            document.getElementById('midtermScore').value = 65;
+            document.getElementById('midtermWeight').value = 40;
+            document.getElementById('extraScore').value = 80;
+            document.getElementById('extraWeight').value = 0;
+            document.getElementById('finalWeight').value = 60;
+            document.getElementById('finalCutoff').value = 50;
+            calculateExamRequirements();
+        }
+
+        function calculateExamRequirements() {
+            const mScore = parseFloat(document.getElementById('midtermScore')?.value) || 0;
+            const mWeight = parseFloat(document.getElementById('midtermWeight')?.value) || 0;
+            const eScore = parseFloat(document.getElementById('extraScore')?.value) || 0;
+            const eWeight = parseFloat(document.getElementById('extraWeight')?.value) || 0;
+            const fWeight = parseFloat(document.getElementById('finalWeight')?.value) || 0;
+            const fCutoff = parseFloat(document.getElementById('finalCutoff')?.value) || 0;
+
+            const classMean = parseFloat(document.getElementById('classMean')?.value) || 45;
+            const classStd = Math.max(1, parseFloat(document.getElementById('classStdDev')?.value) || 15);
+
+            const totalWeight = mWeight + eWeight + fWeight;
+            const warningEl = document.getElementById('weightWarning');
+
+            if (Math.abs(totalWeight - 100) > 0.01) {
+                warningEl.classList.remove('hidden');
+                warningEl.innerText = `⚠️ Ağırlıkların toplamı %${totalWeight} yapıyor (100% olmalı).`;
+            } else {
+                warningEl.classList.add('hidden');
+            }
+
+            const currentPoints = (mScore * (mWeight / 100)) + (eScore * (eWeight / 100));
+            document.getElementById('currentWeightedScore').innerHTML = `${currentPoints.toFixed(2)} <span class="text-xs font-normal text-slate-500">/ 100</span>`;
+            document.getElementById('cutoffNotice').innerText = `Final Barajı: ${fCutoff}`;
+
+            const listEl = document.getElementById('examRequirementsList');
+            listEl.innerHTML = '';
+
+            EXAM_THRESHOLDS.forEach(item => {
+                let targetTotalScore = item.absMin;
+                if (examMode === 'curve') {
+                    targetTotalScore = classMean + ((item.tScoreMin - 50) / 10) * classStd;
+                    targetTotalScore = Math.max(35, Math.min(98, targetTotalScore));
+                }
+
+                const rawNeededFinal = fWeight > 0 ? ((targetTotalScore - currentPoints) / (fWeight / 100)) : 999;
+                const effectiveNeededFinal = Math.max(fCutoff, Math.ceil(rawNeededFinal));
+                const isCutoffEnforced = Math.ceil(rawNeededFinal) < fCutoff;
+
+                let badgeHtml = '', rowBorder = 'border-slate-800/90';
+
+                if (effectiveNeededFinal > 100) {
+                    badgeHtml = `<span class="text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-lg">İmkansız (${Math.ceil(rawNeededFinal)})</span>`;
+                } else if (effectiveNeededFinal >= 85) {
+                    badgeHtml = `<span class="text-xs font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-lg">En Az ${effectiveNeededFinal}</span>`;
+                } else {
+                    badgeHtml = `<span class="text-xs font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg">En Az ${effectiveNeededFinal} ${isCutoffEnforced ? '(Baraj)' : ''}</span>`;
+                    if (item.letter === 'CC' || item.letter === 'BB') rowBorder = 'border-indigo-500/30';
+                }
+
+                const row = document.createElement('div');
+                row.className = `flex justify-between items-center bg-slate-950 border ${rowBorder} rounded-xl px-3.5 py-2.5`;
+                row.innerHTML = `
+                    <div>
+                        <span class="font-black text-sm text-white mr-2">${item.letter}</span>
+                        <span class="text-[11px] text-slate-400">
+                            (Hedef Ort: <strong class="text-slate-300">${targetTotalScore.toFixed(1)}</strong> ${examMode === 'curve' ? `&bull; T:${item.tScoreMin}` : ''})
+                        </span>
+                    </div>
+                    ${badgeHtml}
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        function saveExamRecord() {
+            const name = document.getElementById('examCourseName')?.value.trim() || `Ders ${savedExams.length + 1}`;
+            const mScore = parseFloat(document.getElementById('midtermScore')?.value) || 0;
+            const mWeight = parseFloat(document.getElementById('midtermWeight')?.value) || 40;
+            const eScore = parseFloat(document.getElementById('extraScore')?.value) || 0;
+            const eWeight = parseFloat(document.getElementById('extraWeight')?.value) || 0;
+            const fWeight = parseFloat(document.getElementById('finalWeight')?.value) || 60;
+            const fCutoff = parseFloat(document.getElementById('finalCutoff')?.value) || 50;
+
+            const currentPoints = (mScore * (mWeight / 100)) + (eScore * (eWeight / 100));
+            const ccTarget = examMode === 'curve'
+                ? ((parseFloat(document.getElementById('classMean')?.value) || 45) + ((47 - 50) / 10) * (parseFloat(document.getElementById('classStdDev')?.value) || 15))
+                : 60;
+            const ccFinal = Math.max(fCutoff, Math.ceil((ccTarget - currentPoints) / (fWeight / 100)));
+
+            savedExams.push({
+                id: Date.now(), name, mode: examMode, mScore, mWeight, eScore, eWeight, fWeight, fCutoff,
+                currentPoints: currentPoints.toFixed(1), ccFinal
+            });
+
+            localStorage.setItem('unitool_saved_exams', JSON.stringify(savedExams));
+            renderSavedExams();
+        }
+
+        function deleteSavedExam(id) {
+            savedExams = savedExams.filter(x => x.id !== id);
+            localStorage.setItem('unitool_saved_exams', JSON.stringify(savedExams));
+            renderSavedExams();
+        }
+
+        function renderSavedExams() {
+            const wrap = document.getElementById('savedExamsWrapper');
+            const list = document.getElementById('savedExamsList');
+            list.innerHTML = '';
+
+            if (savedExams.length === 0) {
+                wrap.classList.add('hidden');
+                return;
+            }
+
+            wrap.classList.remove('hidden');
+            savedExams.forEach(ex => {
+                const item = document.createElement('div');
+                item.className = 'bg-slate-900 border border-slate-800 rounded-xl p-3 flex justify-between items-center';
+                item.innerHTML = `
+                    <div>
+                        <span class="font-bold text-xs text-white block">${ex.name} <span class="text-[10px] text-indigo-400">(${ex.mode === 'curve' ? 'Çan' : 'Mutlak'})</span></span>
+                        <span class="text-[11px] text-slate-400">
+                            Vize: ${ex.mScore} (%${ex.mWeight}) &bull; Cepte: <strong class="text-slate-200">${ex.currentPoints}p</strong> &bull; CC İçin Final: <strong class="text-emerald-400">${ex.ccFinal > 100 ? 'İmkansız' : ex.ccFinal}</strong>
+                        </span>
+                    </div>
+                    <button type="button" onclick="deleteSavedExam(${ex.id})" class="text-slate-400 px-2">&times;</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // --- SERVICE WORKER KAYDI VE GÜNCELLEME KONTROLÜ ---
+        if ('serviceWorker' in navigator) {
+            let newWorker;
+            const updateToast = document.getElementById('updateToast');
+            const updateBtn = document.getElementById('updateBtn');
+
+            function showUpdateBar(worker) {
+                newWorker = worker;
+                if (!updateToast) return;
+                updateToast.classList.remove('hidden');
+                setTimeout(() => updateToast.classList.remove('translate-y-10'), 50);
+            }
+
+            if (updateBtn) {
+                updateBtn.addEventListener('click', () => {
+                    if (newWorker) newWorker.postMessage({ action: 'skipWaiting' });
+                });
+            }
+
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then((reg) => {
+                    reg.update();
+                    reg.addEventListener('updatefound', () => {
+                        const installingWorker = reg.installing;
+                        if (!installingWorker) return;
+                        installingWorker.addEventListener('statechange', () => {
+                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateBar(installingWorker);
+                            }
+                        });
+                    });
+                }).catch(() => {});
+            });
+        }
+
+        // Başlangıç Yüklemesi
+        renderCourses();
+        renderDailyCheckinBanner();
+        setTimeout(checkAndSendDailyNotification, 1500);
+    </script>
+</body>
+</html>
