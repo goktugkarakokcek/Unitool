@@ -10,7 +10,7 @@
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" type="image/svg+xml" href="./icon.svg">
     <link rel="apple-touch-icon" href="./icon.svg">
-    <title>UniTool v4.3 - Akademik Kontrol</title>
+    <title>UniTool v4.4 - Akademik Kontrol</title>
     <style>
         /* SIFIRLAMA VE TEMEL DEĞİŞKENLER */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border: 0 solid #1e293b; }
@@ -24,7 +24,7 @@
             padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
             overflow-x: hidden;
         }
-        input, select, textarea { user-select: auto; font-family: inherit; }
+        input, select, textarea { user-select: auto; font-family: inherit; color-scheme: dark; }
 
         /* GÜVENLİ ALAN & ÇENTİK */
         header { padding-top: max(0.875rem, calc(env(safe-area-inset-top) + 0.5rem)) !important; }
@@ -79,7 +79,9 @@
         .mx-auto { margin-left: auto; margin-right: auto; }
         .w-full { width: 100%; }
         .w-5 { width: 1.25rem; }
+        .w-6 { width: 1.5rem; }
         .w-10 { width: 2.5rem; }
+        .w-12 { width: 3rem; }
         .w-14 { width: 3.5rem; }
         .w-16 { width: 4rem; }
         .w-20 { width: 5rem; }
@@ -87,8 +89,11 @@
         .w-72 { width: 18rem; }
         .h-full { height: 100%; }
         .h-5 { height: 1.25rem; }
+        .h-6 { height: 1.5rem; }
+        .h-8 { height: 2rem; }
         .h-10 { height: 2.5rem; }
         .h-2\.5 { height: 0.625rem; }
+        .max-h-48 { max-height: 12rem; }
         .max-h-\[60vh\] { max-height: 60vh; }
         .overflow-y-auto { overflow-y: auto; }
 
@@ -122,6 +127,7 @@
         .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
 
         .-ml-1 { margin-left: -0.25rem; }
+        .ml-1 { margin-left: 0.25rem; }
         .mt-0\.5 { margin-top: 0.125rem; }
         .mt-1 { margin-top: 0.25rem; }
         .mt-2 { margin-top: 0.5rem; }
@@ -299,7 +305,7 @@
                     <span class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg text-sm font-black">UT</span>
                     <div>
                         <span class="font-bold text-white text-base block leading-none">UniTool</span>
-                        <span class="text-[11px] text-slate-400 mt-1 block">v4.3 Saf Gemini AI</span>
+                        <span class="text-[11px] text-slate-400 mt-1 block">v4.4 Saf Gemini AI</span>
                     </div>
                 </div>
                 <button type="button" onclick="toggleDrawer(false)" class="text-slate-400 p-1 text-2xl leading-none">&times;</button>
@@ -365,7 +371,7 @@
         </div>
 
         <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
-            UniTool v4.3 &bull; Gemini Vision
+            UniTool v4.4 &bull; Gemini Vision
         </div>
     </aside>
 
@@ -976,7 +982,7 @@ const CLIENT_KEY_POOL = [];
         // --- JSON YEDEKLEME VE GERİ YÜKLEME ---
         function exportAllDataJSON() {
             const payload = {
-                version: '4.3',
+                version: '4.4',
                 exportedAt: new Date().toISOString(),
                 courses,
                 scheduleItems,
@@ -1009,6 +1015,8 @@ const CLIENT_KEY_POOL = [];
                     if (data.gpaSettings) gpaSettings = data.gpaSettings;
                     if (Array.isArray(data.savedExams)) savedExams = data.savedExams;
 
+                    migrateCoursesData();
+
                     localStorage.setItem('unitool_courses', JSON.stringify(courses));
                     localStorage.setItem('unitool_schedule', JSON.stringify(scheduleItems));
                     localStorage.setItem('unitool_att_logs', JSON.stringify(attendanceLogs));
@@ -1024,6 +1032,60 @@ const CLIENT_KEY_POOL = [];
             };
             reader.readAsText(file);
             e.target.value = '';
+        }
+
+        // --- TARİH FORMATLAMA VE VERİ GÖÇÜ (MIGRATION) ---
+        const TR_MONTHS = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+
+        function formatTurkishDate(dateInput) {
+            let d;
+            if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+                const [y, m, day] = dateInput.split('-').map(Number);
+                d = new Date(y, m - 1, day);
+            } else if (typeof dateInput === 'string' && dateInput.trim().length > 0) {
+                return dateInput.trim();
+            } else if (dateInput instanceof Date) {
+                d = dateInput;
+            } else {
+                d = new Date();
+            }
+            const dayStr = String(d.getDate()).padStart(2, '0');
+            const monthStr = TR_MONTHS[d.getMonth()];
+            const yearStr = d.getFullYear();
+            return `${dayStr} ${monthStr} ${yearStr}`;
+        }
+
+        function migrateCoursesData() {
+            if (!Array.isArray(courses)) {
+                courses = [];
+                return;
+            }
+            let updated = false;
+            courses.forEach(course => {
+                if (!Array.isArray(course.absenceHistory)) {
+                    course.absenceHistory = [];
+                    updated = true;
+                }
+                const currentAbs = Number(course.currentAbsence) || 0;
+                const historyTotal = course.absenceHistory.reduce((sum, item) => sum + (Number(item.hours) || 0), 0);
+                if (currentAbs > historyTotal) {
+                    const farkSaat = currentAbs - historyTotal;
+                    course.absenceHistory.push({
+                        id: 'legacy_' + Date.now(),
+                        date: 'Güncelleme Öncesi',
+                        hours: farkSaat,
+                        type: 'legacy'
+                    });
+                    updated = true;
+                }
+            });
+            if (updated) {
+                localStorage.setItem('unitool_courses', JSON.stringify(courses));
+            }
+        }
+
+        function migrateData() {
+            migrateCoursesData();
         }
 
         // --- GÜNLÜK AKILLI YOKLAMA SİSTEMİ ---
@@ -1090,7 +1152,15 @@ const CLIENT_KEY_POOL = [];
                 syncScheduleToAttendance(false);
                 const targetCourse = courses.find(c => c.name.trim().toLowerCase() === item.name.trim().toLowerCase());
                 if (targetCourse) {
-                    targetCourse.currentAbsence += Number(item.hours) || 1;
+                    const addedHours = Number(item.hours) || 1;
+                    if (!Array.isArray(targetCourse.absenceHistory)) targetCourse.absenceHistory = [];
+                    targetCourse.currentAbsence += addedHours;
+                    targetCourse.absenceHistory.push({
+                        id: 'checkin_' + Date.now(),
+                        date: formatTurkishDate(new Date()),
+                        hours: addedHours,
+                        source: 'Yoklama Bildirimi'
+                    });
                     saveCourses();
                 }
             }
@@ -1563,7 +1633,8 @@ KESİN KURALLAR:
                         weeklyHours: info.totalWeeklyHours,
                         totalWeeks: 14,
                         reqAttendance: 70,
-                        currentAbsence: 0
+                        currentAbsence: 0,
+                        absenceHistory: []
                     });
                     createdCount++;
                 }
@@ -1672,6 +1743,8 @@ KESİN KURALLAR:
             document.getElementById('prevSafe').innerText = `Maks. ${safeMax} Saat`;
         }
 
+        let openAbsenceHistoryMap = {};
+
         function addAttendanceCourse(e) {
             e.preventDefault();
             const name = document.getElementById('courseName').value.trim();
@@ -1679,17 +1752,68 @@ KESİN KURALLAR:
             const totalWeeks = parseInt(document.getElementById('totalWeeks').value);
             const reqAttendance = parseFloat(document.getElementById('reqAttendance').value);
 
-            courses.push({ id: Date.now(), name, weeklyHours, totalWeeks, reqAttendance, currentAbsence: 0 });
+            courses.push({ id: Date.now(), name, weeklyHours, totalWeeks, reqAttendance, currentAbsence: 0, absenceHistory: [] });
             document.getElementById('courseForm').reset();
             toggleAttendanceModal();
             saveCourses();
         }
 
-        function updateAbsence(id, delta) {
-            const course = courses.find(c => c.id === id);
+        function updateAbsence(courseId, delta, customDate) {
+            const course = courses.find(c => String(c.id) === String(courseId));
             if (!course) return;
-            course.currentAbsence = Math.max(0, course.currentAbsence + delta);
+            if (!Array.isArray(course.absenceHistory)) course.absenceHistory = [];
+
+            if (delta > 0) {
+                const formattedDate = customDate ? formatTurkishDate(customDate) : formatTurkishDate(new Date());
+                course.absenceHistory.push({
+                    id: 'abs_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    date: formattedDate,
+                    hours: delta
+                });
+                course.currentAbsence = (Number(course.currentAbsence) || 0) + delta;
+            } else if (delta < 0) {
+                if ((Number(course.currentAbsence) || 0) <= 0) return;
+                course.currentAbsence = Math.max(0, (Number(course.currentAbsence) || 0) - 1);
+                if (course.absenceHistory.length > 0) {
+                    const lastEntry = course.absenceHistory[course.absenceHistory.length - 1];
+                    lastEntry.hours = (Number(lastEntry.hours) || 1) - 1;
+                    if (lastEntry.hours <= 0) {
+                        course.absenceHistory.pop();
+                    }
+                }
+            }
             saveCourses();
+        }
+
+        function toggleAbsenceHistory(courseId) {
+            const key = String(courseId);
+            openAbsenceHistoryMap[key] = !openAbsenceHistoryMap[key];
+            const el = document.getElementById(`absHistorySection_${key}`);
+            if (el) {
+                el.classList.toggle('hidden', !openAbsenceHistoryMap[key]);
+            }
+        }
+
+        function deleteAbsenceRecord(courseId, recordId) {
+            const course = courses.find(c => String(c.id) === String(courseId));
+            if (!course || !Array.isArray(course.absenceHistory)) return;
+            const idx = course.absenceHistory.findIndex(r => String(r.id) === String(recordId));
+            if (idx === -1) return;
+            const removedHours = Number(course.absenceHistory[idx].hours) || 0;
+            course.absenceHistory.splice(idx, 1);
+            course.currentAbsence = Math.max(0, (Number(course.currentAbsence) || 0) - removedHours);
+            openAbsenceHistoryMap[String(courseId)] = true;
+            saveCourses();
+        }
+
+        function addManualAbsenceEntry(courseId) {
+            const key = String(courseId);
+            const dateInput = document.getElementById(`manualAbsDate_${key}`);
+            const hoursInput = document.getElementById(`manualAbsHours_${key}`);
+            const rawDate = dateInput?.value || getTodayDateString();
+            const hours = Math.max(1, parseInt(hoursInput?.value) || 1);
+            openAbsenceHistoryMap[key] = true;
+            updateAbsence(courseId, hours, rawDate);
         }
 
         function deleteCourse(id) {
@@ -1719,6 +1843,10 @@ KESİN KURALLAR:
             let riskCount = 0, failedCount = 0;
 
             courses.forEach(course => {
+                if (!Array.isArray(course.absenceHistory)) course.absenceHistory = [];
+                const history = course.absenceHistory;
+                const isHistoryOpen = !!openAbsenceHistoryMap[String(course.id)];
+
                 const totalHours = course.weeklyHours * course.totalWeeks;
                 const absenceAllowancePercent = 100 - course.reqAttendance;
                 const exactAllowed = totalHours * (absenceAllowancePercent / 100);
@@ -1745,6 +1873,19 @@ KESİN KURALLAR:
                 }
 
                 const progressPercent = safeMax > 0 ? Math.min(100, (course.currentAbsence / safeMax) * 100) : 100;
+
+                const historyItemsHtml = history.length === 0
+                    ? `<p class="text-[11px] text-slate-500 text-center py-1.5">Henüz tarihli devamsızlık kaydı bulunmuyor.</p>`
+                    : history.map(rec => `
+                        <div class="flex justify-between items-center bg-slate-900 border border-slate-800/80 rounded-lg px-2.5 py-1.5 text-xs">
+                            <span class="text-slate-200">
+                                &bull; ${rec.date} &mdash; <strong class="text-white">${rec.hours} Saat</strong>
+                                ${rec.source ? `<span class="text-[10px] text-indigo-300 bg-indigo-950/40 border border-indigo-500/30 px-1.5 py-0.5 rounded ml-1">${rec.source}</span>` : ''}
+                            </span>
+                            <button type="button" onclick="deleteAbsenceRecord('${course.id}', '${rec.id}')" 
+                                class="text-rose-400 font-bold text-base px-1.5 leading-none active:scale-90 transition" title="Kaydı Sil">&times;</button>
+                        </div>
+                    `).join('');
 
                 const card = document.createElement('div');
                 card.className = `bg-slate-900 border ${borderColor} rounded-2xl p-4 shadow-md`;
@@ -1784,6 +1925,31 @@ KESİN KURALLAR:
                                 class="w-10 h-10 rounded-lg bg-indigo-600 text-white font-bold text-lg flex items-center justify-center active:scale-90 transition" style="background:#4f46e5;">+</button>
                             <button type="button" onclick="updateAbsence(${course.id}, ${course.weeklyHours})" 
                                 class="h-10 px-2.5 rounded-lg bg-slate-800 text-indigo-300 font-semibold text-xs flex items-center justify-center active:scale-90 transition" style="background:#1e293b;">+${course.weeklyHours}s</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 pt-2 border-t border-slate-800">
+                        <button type="button" onclick="toggleAbsenceHistory('${course.id}')"
+                            class="w-full flex items-center justify-between text-xs font-semibold text-indigo-300 py-1">
+                            <span>📅 Devamsızlık Tarihleri (${history.length} kayıt)</span>
+                            <span class="text-[11px] text-slate-400">Aç / Kapat</span>
+                        </button>
+
+                        <div id="absHistorySection_${course.id}" class="${isHistoryOpen ? '' : 'hidden'} mt-2 bg-slate-950 border border-slate-800 rounded-xl p-2.5 space-y-2">
+                            <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                                ${historyItemsHtml}
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-800 flex items-center gap-1.5">
+                                <input type="date" id="manualAbsDate_${course.id}" value="${getTodayDateString()}"
+                                    class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-white" style="min-width:0;">
+                                <input type="number" id="manualAbsHours_${course.id}" min="1" max="20" value="1" title="Saat"
+                                    class="w-12 bg-slate-900 border border-slate-800 rounded-lg px-1.5 py-1.5 text-xs text-center text-emerald-400 font-bold">
+                                <button type="button" onclick="addManualAbsenceEntry('${course.id}')"
+                                    class="bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition shrink-0" style="background:#4f46e5;">
+                                    Ekle
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -2247,6 +2413,7 @@ KESİN KURALLAR:
         }
 
         // Başlangıç Yüklemesi
+        migrateCoursesData();
         renderCourses();
         renderDailyCheckinBanner();
         setTimeout(checkAndSendDailyNotification, 1500);
